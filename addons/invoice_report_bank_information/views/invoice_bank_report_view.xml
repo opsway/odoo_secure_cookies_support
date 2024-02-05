@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_invoice_bank_information_inherit_payments" inherit_id="account.report_invoice_document">
+                <!-- <xpath expr="//t/t/div/p[3]" position="after"> -->
+                <xpath expr="//div[@name='payment_term']" position="after">
+                    <t t-if="not move_type in ['out_invoice','out_refund']">
+                         <div style="page-break-inside: avoid;">
+                             <strong style="text-decoration: underline;">Bank Details for Payment</strong>
+                             <div>
+                                 <strong>Bank : </strong>
+                                 <span t-esc="o.partner_bank_id.bank_id.name"/>
+                             </div>
+                             <div>
+                                 <strong>Bank BIC/Swift Code : </strong>
+                                 <span t-esc="o.partner_bank_id.bank_id.bic"/>
+                             </div>
+                             <div>
+                                 <strong>Account Number : </strong>
+                                 <span t-esc="o.partner_bank_id.acc_number"/>
+                             </div>
+                             <div>
+                                 <strong>Account Holder Name : </strong>
+                                 <span t-esc="o.partner_bank_id.acc_holder_name"/>
+                             </div>
+                         </div>
+                    </t>
+                </xpath>
+        </template>
+    </data>
+</odoo>
