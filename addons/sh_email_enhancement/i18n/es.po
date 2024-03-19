@@ -1,0 +1,123 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* sh_email_enhancement
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-06-28 10:19+0000\n"
+"PO-Revision-Date: 2023-06-28 10:19+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: sh_email_enhancement
+#: model_terms:ir.ui.view,arch_db:sh_email_enhancement.sh_email_enhancement_email_compose_message_wizard_form
+msgid "Add contacts to notify..."
+msgstr "Agregar contactos para notificar ..."
+
+#. module: sh_email_enhancement
+#. odoo-javascript
+#: code:addons/sh_email_enhancement/static/src/xml/message.xml:0
+#, python-format
+msgid "BCC:"
+msgstr "BCC:"
+
+#. module: sh_email_enhancement
+#. odoo-javascript
+#: code:addons/sh_email_enhancement/static/src/xml/message.xml:0
+#, python-format
+msgid "CC:"
+msgstr "CC:"
+
+#. module: sh_email_enhancement
+#: model:ir.model,name:sh_email_enhancement.model_res_company
+msgid "Companies"
+msgstr "Compañías"
+
+#. module: sh_email_enhancement
+#: model:ir.model,name:sh_email_enhancement.model_res_config_settings
+msgid "Config Settings"
+msgstr "Configuración de configuración"
+
+#. module: sh_email_enhancement
+#: model:ir.model.fields,field_description:sh_email_enhancement.field_res_company__email_bcc_ids
+#: model:ir.model.fields,field_description:sh_email_enhancement.field_res_config_settings__email_bcc_ids
+msgid "Default BCC"
+msgstr "BCC predeterminado"
+
+#. module: sh_email_enhancement
+#: model:ir.model.fields,field_description:sh_email_enhancement.field_res_company__email_cc_ids
+#: model:ir.model.fields,field_description:sh_email_enhancement.field_res_config_settings__email_cc_ids
+msgid "Default CC"
+msgstr "CC predeterminado"
+
+#. module: sh_email_enhancement
+#: model:ir.model.fields,field_description:sh_email_enhancement.field_account_invoice_send__bcc_email
+#: model:ir.model.fields,field_description:sh_email_enhancement.field_account_invoice_send__email_bcc_ids
+#: model:ir.model.fields,field_description:sh_email_enhancement.field_mail_compose_message__bcc_email
+#: model:ir.model.fields,field_description:sh_email_enhancement.field_mail_compose_message__email_bcc_ids
+#: model:ir.model.fields,field_description:sh_email_enhancement.field_mail_mail__bcc_email
+#: model:ir.model.fields,field_description:sh_email_enhancement.field_mail_mail__email_bcc_ids
+#: model:ir.model.fields,field_description:sh_email_enhancement.field_mail_message__bcc_email
+#: model:ir.model.fields,field_description:sh_email_enhancement.field_mail_message__email_bcc_ids
+msgid "Email BCC"
+msgstr "Correo electrónico BCC"
+
+#. module: sh_email_enhancement
+#: model:ir.model.fields,field_description:sh_email_enhancement.field_account_invoice_send__cc_email
+#: model:ir.model.fields,field_description:sh_email_enhancement.field_account_invoice_send__email_cc_ids
+#: model:ir.model.fields,field_description:sh_email_enhancement.field_mail_compose_message__cc_email
+#: model:ir.model.fields,field_description:sh_email_enhancement.field_mail_compose_message__email_cc_ids
+#: model:ir.model.fields,field_description:sh_email_enhancement.field_mail_mail__cc_email
+#: model:ir.model.fields,field_description:sh_email_enhancement.field_mail_mail__email_cc_ids
+#: model:ir.model.fields,field_description:sh_email_enhancement.field_mail_message__cc_email
+#: model:ir.model.fields,field_description:sh_email_enhancement.field_mail_message__email_cc_ids
+msgid "Email CC"
+msgstr "Correo electrónico CC"
+
+#. module: sh_email_enhancement
+#: model_terms:ir.ui.view,arch_db:sh_email_enhancement.sh_email_enhancement_config_settings
+msgid "Email CC &amp; BCC"
+msgstr "Correo electrónico cc & BCC"
+
+#. module: sh_email_enhancement
+#: model:ir.model,name:sh_email_enhancement.model_mail_compose_message
+msgid "Email composition wizard"
+msgstr "Asistente de composición de correo electrónico"
+
+#. module: sh_email_enhancement
+#. odoo-python
+#: code:addons/sh_email_enhancement/models/mail.py:0
+#, python-format
+msgid ""
+"Error without exception. Probably due to concurrent access update of "
+"notification records. Please see with an administrator."
+msgstr ""
+"Error sin excepción. Probablemente debido a la actualización de acceso concurrente de "
+"Registros de notificación. Consulte con un administrador."
+
+#. module: sh_email_enhancement
+#. odoo-python
+#: code:addons/sh_email_enhancement/models/mail.py:0
+#, python-format
+msgid ""
+"Error without exception. Probably due to sending an email without computed "
+"recipients."
+msgstr ""
+"Error sin excepción. Probablemente debido a enviar un correo electrónico sin calculado "
+"destinatarios."
+
+#. module: sh_email_enhancement
+#: model:ir.model,name:sh_email_enhancement.model_mail_message
+msgid "Message"
+msgstr "Mensaje"
+
+#. module: sh_email_enhancement
+#: model:ir.model,name:sh_email_enhancement.model_mail_mail
+msgid "Outgoing Mails"
+msgstr "Correos salientes"

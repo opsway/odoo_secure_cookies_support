@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <record model="ir.ui.view" id="sh_email_enhancement_email_compose_message_wizard_form">
+        <field name="name">mail.compose.message.form.inherit</field>
+        <field name="model">mail.compose.message</field>
+        <field name="inherit_id" ref="mail.email_compose_message_wizard_form" />
+        <field name="arch" type="xml">
+            <field name="subject" position="after">
+                <field name="email_cc_ids" widget="many2many_tags" placeholder="Add contacts to notify..." />
+                <field name="email_bcc_ids" widget="many2many_tags" placeholder="Add contacts to notify..." />
+            </field>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="sh_mail_view_mail_form_inherit">
+        <field name="name">mail.view_mail_form.inherit</field>
+        <field name="model">mail.mail</field>
+        <field name="inherit_id" ref="mail.view_mail_form" />
+        <field name="arch" type="xml">
+            <field name="email_cc" position="after"> <field name="cc_email" /><field name="bcc_email" /> </field>
+            <field name="email_cc" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="sh_mail_view_message_form_inherit">
+        <field name="name">mail.view_message_form.inherit</field>
+        <field name="model">mail.message</field>
+        <field name="inherit_id" ref="mail.mail_message_view_form" />
+        <field name="arch" type="xml">
+            <field name="author_id" position="after"> <field name="cc_email" /><field name="bcc_email" /> </field>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-extend="Message" t-inherit="mail.Message" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('o_Message_header')]" position="after">
+            <span style="color: #adb5bd !important;">
+                <t t-if="messageView.message.cc_email">
+                    <span>CC:</span>
+                    <b><t t-esc="messageView.message.cc_email" /></b><br />
+                </t>
+                <t t-if="messageView.message.bcc_email">
+                    <span>BCC: </span>
+                    <b><t t-esc="messageView.message.bcc_email" /></b><br />
+                </t>
+            </span>
+        </xpath>
+    </t>
+</templates>
