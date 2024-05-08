@@ -1,0 +1,4 @@
+[submodule "submodules"]
+	path = submodules
+	url = git@github.com:opsway/odoo-modules.git
+	branch = v17
