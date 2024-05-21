@@ -1,0 +1,3 @@
+pytest-odoo==0.9.1
+pydevd-odoo==1.2.1
+parameterized==0.9.0
