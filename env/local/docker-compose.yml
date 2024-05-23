@@ -1,0 +1,29 @@
+version: '2'
+services:
+  web:
+    container_name: opsway-web
+    image: lumirang_odoo_local_opsway
+    build: ../..
+    user: odoo
+    depends_on:
+      - opsway-db
+    ports:
+      - "8010:8069"
+    volumes:
+      - ../../addons:/mnt/extra-addons
+      - ../../submodules:/mnt/submodules
+      - ../../enterprise:/mnt/enterprise
+      - ./odoo.conf:/etc/odoo/odoo.conf
+    environment:
+      - HOST=mydb
+      - USER=odoo
+      - PASSWORD=myodoo
+  opsway-db:
+    container_name: opsway-db
+    ports:
+      - "5419:5432"
+    image: postgres:15.4
+    environment:
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=myodoo
+      - POSTGRES_DB=postgres
