@@ -1,0 +1,39 @@
+<odoo>
+    <record id="view_move_form_inherit_opsway" model="ir.ui.view">
+        <field name="name">account.move.form.inherit.opsway</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="Bill (Sign)" invisible="move_type != 'in_invoice'">
+                    <group>
+                        <field name="service_agreement"/>
+                        <field name="invoice_number"/>
+                    </group>
+                    <field name="employee_bill_sign_ids">
+                        <tree editable="bottom">
+                            <field name="description"/>
+                            <field name="period"/>
+                            <field name="quantity"/>
+                            <field name="price"/>
+                            <field name="amount"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+    <record id="account_pe_invoice" model="ir.actions.report">
+        <field name="name">PE Invoice</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">opsway_employee_bill.report_opsway_employee_bill_template</field>
+        <field name="report_file">opsway_employee_bill.report_opsway_employee_bill_template</field>
+        <field name="attachment"/>
+        <field name="binding_model_id" ref="model_account_move"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="account.paperformat_euro_bank_statement"/>
+        <field name="groups_id" eval="[(4, ref('account.group_account_invoice')),
+ (4, ref('account.group_account_readonly'))]"/>
+    </record>
+</odoo>

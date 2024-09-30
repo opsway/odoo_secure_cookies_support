@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_opsway_employee_bill_template">
+        <xpath expr="//div[@class='header']" position="replace">
+            <div class="header">
+            </div>
+        </xpath>
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="bill">
+                <style>
+                    /* Add a font that supports Cyrillic characters */
+                    * {
+                        font-family: 'Verdana', sans-serif;
+                        font-size: 12px;
+                        line-height: 1.2;
+                    }
+                </style>
+                <t t-if="bill.move_type == 'in_invoice'">
+                    <t t-call="opsway_employee_bill.report_opsway_employee_bill_document"/>
+                    <t t-if="bill.need_multi_lang_report">
+                        <t t-set="lang" t-value="bill.partner_id.sudo().lang or bill.env.lang"/>
+                        <t t-set="bill" t-value="bill.with_context(lang=lang)"/>
+                        <t t-call="opsway_employee_bill.report_opsway_employee_bill_document"
+                           t-lang="lang"/>
+                    </t>
+                </t>
+                <t t-else="">
+                    <p>This report is only available for Vendor Bills.</p>
+                </t>
+            </t>
+        </t>
+    </template>
+    <template id="report_opsway_employee_bill_document">
+        <xpath expr="//div[@class='header']" position="replace">
+            <div class="header">
+            </div>
+        </xpath>
+        <t t-call="web.external_layout">
+            <div class="page">
+                <t t-set="bill" t-value="bill.with_context(lang=lang)" />
+                <!-- Invoice Number and Date -->
+                <div class="row">
+                    <div t-attf-style="text-align: center;">
+                        <p>Invoice # <t t-esc="bill.invoice_number or bill.name"/></p>
+                    </div>
+                </div>
+                <br/><br/><br/>
+                <div class="row">
+                    <div class="">
+                        <p>Date of Invoice: <t t-esc="bill._get_vendor_invoice_date()"/></p>
+                    </div>
+                </div>
+                <br/>
+                <!-- Contractor Information -->
+                <div class="row">
+                    <div class="col-md-auto">
+                        <span><strong>Contractor</strong></span>
+                        <div>
+                            <span><t t-esc="bill.partner_id.bill_name"/></span>
+                        </div>
+                        <div>
+                            <span>Tax Number: <t t-esc="bill.partner_id.vat"/></span>
+                        </div>
+                        <div>
+                            <span>Address: <t t-esc="bill.partner_id._get_address_data()"/></span>
+                        </div>
+                        <span>Email: <t t-esc="bill.partner_id.email"/></span>
+                    </div>
+                </div>
+                <br/>
+                <!-- Customer Information -->
+                <div class="row">
+                    <div class="col-md-auto">
+                        <span><strong>Customer</strong></span>
+                        <div>
+                            <span>Company Name: <t t-esc="bill.company_id.partner_id.bill_name"/></span>
+                        </div>
+                        <div>
+                            <span>Company NIP: <t t-esc="bill.company_id.vat"/></span>
+                        </div>
+                        <div>
+                            <span>Address: <t t-esc="bill.company_id.partner_id._get_address_data()"/></span>
+                        </div>
+                        <span>Email: <t t-esc="bill.company_id.partner_id.email"/></span>
+                    </div>
+                </div>
+                <br/>
+                <!-- Service Agreement -->
+                <div class="row">
+                    <div class="col-md-auto">
+                        <div>
+                            <span>Service Agreement: <t t-esc="bill.service_agreement"/></span>
+                        </div>
+                    </div>
+                </div>
+                <br/>
+                <!-- Currency -->
+                <div class="row">
+                    <div class="col-md-auto">
+                        <div>
+                            <span>Currency: <t t-esc="bill.currency_id.name"/></span>
+                        </div>
+                    </div>
+                </div>
+                <br/>
+                <!-- Bank Information -->
+                <div class="row">
+                    <t t-if="bill.partner_id.bank_ids or bill.partner_bank_id">
+                        <t t-set="bank" t-value="bill.with_context(lang='en_US').partner_id.bank_ids[0]"/>
+                        <div class="offset-4 col-4">
+                            <span><strong>Bank Information</strong></span>
+                            <div class="row">
+                                <span>Beneficiary: <t t-esc="bank.acc_holder_name"/></span>
+                            </div>
+                            <div class="row">
+                                <span>IBAN: <t t-esc="bank.acc_number"/></span>
+                            </div>
+                            <div class="row">
+                                <span>Swift Code: <t t-esc="bank.bank_bic"/></span>
+                            </div>
+                            <div>
+                                <span>Bank Name: <t t-esc="bank.bank_name"/></span>
+                            </div>
+                            <div>
+                                <span>Bank Address: <t t-esc="bank.bank_id.city"/>, <t
+                                        t-esc="bank.bank_id.country.name"/></span>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <p>No bank information available.</p>
+                    </t>
+                </div>
+                <br/><br/>
+                <!-- Invoice Line Items -->
+                <div class="row">
+                    <div class="col-md-auto" t-attf-style="text-align: center;">
+                        <table class="table table-sm o_main_table table-borderless">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Description</th>
+                                <th>Period</th>
+                                <th>Quantity, days</th>
+                                <th>Rate</th>
+                                <th>Amount</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <t t-foreach="bill.employee_bill_sign_ids" t-as="line">
+                                <t t-set="line" t-value="line.with_context(lang=lang)"/>
+                                <tr>
+                                    <th><t t-esc="line_index + 1"/></th>
+                                    <td><t t-esc="line.description"/></td>
+                                    <td><t t-esc="line.period"/></td>
+                                    <td><t t-esc="line.quantity"/></td>
+                                    <td><t t-esc="line.price"/></td>
+                                    <td><t t-esc="line.amount"/></td>
+                                </tr>
+                            </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <br/>
+                <!-- Total -->
+                <div class="row">
+                    <div class="col-md-auto">
+                        <span>Total: <t t-esc="bill._compute_amount_total_words()"/><t t-esc="bill.amount_total_words"/></span>
+                    </div>
+                </div>
+                <br/><br/>
+                <!-- Terms and Conditions -->
+                <div class="terms" t-attf-style="text-align: left;">
+                    <p><t t-esc="bill.company_id.default_terms"/></p>
+                </div>
+                <br/><br/>
+                <!-- Signature Section -->
+                <p t-attf-style="text-align: center;">Contractor: ____________________ (<t
+                        t-esc="bill.partner_id.bill_name"/>)
+                </p>
+            </div>
+        </t>
+    </template>
+</odoo>
