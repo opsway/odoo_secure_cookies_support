@@ -253,7 +253,7 @@ msgstr ""
 #. module: opsway_employee_bill
 #: model_terms:ir.ui.view,arch_db:opsway_employee_bill.report_opsway_employee_bill_document
 msgid "Invoice #"
-msgstr "Рахунок #"
+msgstr "Інвойс #"
 
 #. module: opsway_employee_bill
 #: model:ir.model.fields,field_description:opsway_employee_bill.field_account_bank_statement_line__invoice_number

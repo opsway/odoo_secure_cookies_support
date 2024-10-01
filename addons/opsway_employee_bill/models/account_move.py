@@ -46,6 +46,10 @@ class AccountMove(models.Model):
         }
         return f'{months[self.invoice_date.month]} {self.invoice_date.day}, {self.invoice_date.year}'
 
+    def _get_total_amount_in_word_pe(self):
+        self.ensure_one()
+        return self.currency_id.amount_to_text(self.amount_total).replace(',', '').capitalize()
+
     def action_post(self):
         res = super(AccountMove, self).action_post()
         if self.move_type == 'in_invoice':
