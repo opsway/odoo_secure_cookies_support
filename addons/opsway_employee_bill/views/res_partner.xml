@@ -1,0 +1,25 @@
+<odoo>
+    <record id="view_partner_form" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='internal_notes']" position="before">
+                <page name="bill_info" string="Bill Info">
+                    <group name="bill_info_container">
+                        <group>
+                            <field name="bill_name"/>
+                            <field name="bill_street"/>
+                            <field name="bill_street2"/>
+                            <field name="bill_zip"/>
+                            <field name="bill_city"/>
+                        </group>
+                        <group>
+                            <field name="bill_state"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
