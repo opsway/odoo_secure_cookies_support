@@ -6,7 +6,7 @@ class EmployeeBillSignLine(models.Model):
     _description = 'Employee Bill Sign Line'
 
     description = fields.Char(translate=True)
-    period = fields.Char(translate=True)
+    period = fields.Char(readonly=True)
     quantity = fields.Float(compute='_compute_quantity', store=True)
     currency_field = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
     price = fields.Monetary(currency_field='currency_field')

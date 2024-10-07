@@ -6,19 +6,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-30 13:44+0000\n"
-"PO-Revision-Date: 2024-09-30 13:44+0000\n"
+"POT-Creation-Date: 2024-10-07 10:35+0000\n"
+"PO-Revision-Date: 2024-10-07 10:35+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
-
-#. module: opsway_employee_bill
-#: model:ir.actions.report,print_report_name:opsway_employee_bill.account_pe_invoice
-msgid "(object._get_report_base_filename())"
-msgstr ""
 
 #. module: opsway_employee_bill
 #: model_terms:ir.ui.view,arch_db:opsway_employee_bill.report_opsway_employee_bill_document
@@ -81,15 +76,10 @@ msgid "Bill (Sign)"
 msgstr "Рахунок (Підпис)"
 
 #. module: opsway_employee_bill
-#: model:ir.model.fields,field_description:opsway_employee_bill.field_res_company__bill_address
-msgid "Bill Address"
-msgstr ""
-
-#. module: opsway_employee_bill
 #: model:ir.model.fields,field_description:opsway_employee_bill.field_res_partner__bill_city
 #: model:ir.model.fields,field_description:opsway_employee_bill.field_res_users__bill_city
 msgid "Bill City"
-msgstr "Місто рахунку"
+msgstr "Місто Інвойсу"
 
 #. module: opsway_employee_bill
 #: model_terms:ir.ui.view,arch_db:opsway_employee_bill.view_company_form
@@ -98,18 +88,17 @@ msgid "Bill Info"
 msgstr "Інформація про рахунок"
 
 #. module: opsway_employee_bill
-#: model:ir.model.fields,field_description:opsway_employee_bill.field_res_company__bill_name
 #: model:ir.model.fields,field_description:opsway_employee_bill.field_res_partner__bill_name
 #: model:ir.model.fields,field_description:opsway_employee_bill.field_res_users__bill_name
 msgid "Bill Name"
-msgstr "Назва рахунку"
+msgstr "Назва Інвойсу"
 
 #. module: opsway_employee_bill
 #: model:ir.model.fields,field_description:opsway_employee_bill.field_account_bank_statement_line__employee_bill_sign_ids
 #: model:ir.model.fields,field_description:opsway_employee_bill.field_account_move__employee_bill_sign_ids
 #: model:ir.model.fields,field_description:opsway_employee_bill.field_account_payment__employee_bill_sign_ids
 msgid "Bill Sign"
-msgstr "Підпис рахунку"
+msgstr "Підпис Інвойсу"
 
 #. module: opsway_employee_bill
 #: model:ir.model.fields,field_description:opsway_employee_bill.field_res_partner__bill_state
@@ -121,19 +110,19 @@ msgstr ""
 #: model:ir.model.fields,field_description:opsway_employee_bill.field_res_partner__bill_street
 #: model:ir.model.fields,field_description:opsway_employee_bill.field_res_users__bill_street
 msgid "Bill Street"
-msgstr "Вулиця рахунку"
+msgstr "Вулиця Інвойсу"
 
 #. module: opsway_employee_bill
 #: model:ir.model.fields,field_description:opsway_employee_bill.field_res_partner__bill_street2
 #: model:ir.model.fields,field_description:opsway_employee_bill.field_res_users__bill_street2
 msgid "Bill Street2"
-msgstr "Вулиця рахунку 2"
+msgstr "Вулиця Інвойсу 2"
 
 #. module: opsway_employee_bill
 #: model:ir.model.fields,field_description:opsway_employee_bill.field_res_partner__bill_zip
 #: model:ir.model.fields,field_description:opsway_employee_bill.field_res_users__bill_zip
 msgid "Bill Zip"
-msgstr "Поштовий індекс рахунку"
+msgstr "Поштовий індекс Інвойсу"
 
 #. module: opsway_employee_bill
 #: model:ir.model,name:opsway_employee_bill.model_res_company
@@ -198,7 +187,7 @@ msgstr "Валюта:"
 #. module: opsway_employee_bill
 #: model_terms:ir.ui.view,arch_db:opsway_employee_bill.report_opsway_employee_bill_document
 msgid "Date of Invoice:"
-msgstr "Дата рахунку:"
+msgstr "Дата Інвойсу:"
 
 #. module: opsway_employee_bill
 #. odoo-python
@@ -231,7 +220,7 @@ msgstr "Електронна пошта:"
 #. module: opsway_employee_bill
 #: model:ir.model,name:opsway_employee_bill.model_employee_bill_sign_line
 msgid "Employee Bill Sign Line"
-msgstr "Лінія підпису рахунку працівника"
+msgstr "Лінія підпису Інвойсу працівника"
 
 #. module: opsway_employee_bill
 #. odoo-python
@@ -253,14 +242,14 @@ msgstr ""
 #. module: opsway_employee_bill
 #: model_terms:ir.ui.view,arch_db:opsway_employee_bill.report_opsway_employee_bill_document
 msgid "Invoice #"
-msgstr "Рахунок #"
+msgstr "Інвойс #"
 
 #. module: opsway_employee_bill
 #: model:ir.model.fields,field_description:opsway_employee_bill.field_account_bank_statement_line__invoice_number
 #: model:ir.model.fields,field_description:opsway_employee_bill.field_account_move__invoice_number
 #: model:ir.model.fields,field_description:opsway_employee_bill.field_account_payment__invoice_number
 msgid "Invoice Number"
-msgstr "Номер рахунку"
+msgstr "Номер Інвойсу"
 
 #. module: opsway_employee_bill
 #. odoo-python

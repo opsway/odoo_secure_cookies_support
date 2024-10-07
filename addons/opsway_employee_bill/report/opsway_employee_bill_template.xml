@@ -5,6 +5,10 @@
             <div class="header">
             </div>
         </xpath>
+        <xpath expr="//div[@class='footer']" position="replace">
+            <div class="footer">
+            </div>
+        </xpath>
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="bill">
                 <style>
@@ -35,18 +39,22 @@
             <div class="header">
             </div>
         </xpath>
+        <xpath expr="//div[@class='footer']" position="replace">
+            <div class="footer">
+            </div>
+        </xpath>
         <t t-call="web.external_layout">
             <div class="page">
                 <t t-set="bill" t-value="bill.with_context(lang=lang)" />
                 <!-- Invoice Number and Date -->
                 <div class="row">
-                    <div t-attf-style="text-align: center;">
+                    <div class="col-md-auto">
                         <p>Invoice # <t t-esc="bill.invoice_number or bill.name"/></p>
                     </div>
                 </div>
                 <br/><br/><br/>
                 <div class="row">
-                    <div class="">
+                    <div class="col-md-auto">
                         <p>Date of Invoice: <t t-esc="bill._get_vendor_invoice_date()"/></p>
                     </div>
                 </div>
@@ -107,7 +115,7 @@
                 <div class="row">
                     <t t-if="bill.partner_id.bank_ids or bill.partner_bank_id">
                         <t t-set="bank" t-value="bill.with_context(lang='en_US').partner_id.bank_ids[0]"/>
-                        <div class="offset-4 col-4">
+                        <div class="col-md-auto">
                             <span><strong>Bank Information</strong></span>
                             <div class="row">
                                 <span>Beneficiary: <t t-esc="bank.acc_holder_name"/></span>
@@ -152,7 +160,7 @@
                                 <tr>
                                     <th><t t-esc="line_index + 1"/></th>
                                     <td><t t-esc="line.description"/></td>
-                                    <td><t t-esc="line.period"/></td>
+                                    <td><t t-esc="bill._get_vendor_invoice_period()"/></td>
                                     <td><t t-esc="line.quantity"/></td>
                                     <td><t t-esc="line.price"/></td>
                                     <td><t t-esc="line.amount"/></td>
@@ -166,7 +174,7 @@
                 <!-- Total -->
                 <div class="row">
                     <div class="col-md-auto">
-                        <span>Total: <t t-esc="bill._compute_amount_total_words()"/><t t-esc="bill.amount_total_words"/></span>
+                        <span>Total: <t t-esc="bill._get_total_amount_in_word_pe()"/></span>
                     </div>
                 </div>
                 <br/><br/>
