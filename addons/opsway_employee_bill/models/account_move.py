@@ -28,23 +28,30 @@ class AccountMove(models.Model):
         self.employee_bill_sign_ids.unlink()
         return res
 
+    def _get_months(self, month_number):
+        months = [
+            (1, _('January')),
+            (2, _('February')),
+            (3, _('March')),
+            (4, _('April')),
+            (5, _('May')),
+            (6, _('June')),
+            (7, _('July')),
+            (8, _('August')),
+            (9, _('September')),
+            (10, _('October')),
+            (11, _('November')),
+            (12, _('December')),
+        ]
+        return dict(months)[month_number]
+
     def _get_vendor_invoice_date(self):
         self.ensure_one()
-        months = {
-            1: _('January'),
-            2: _('February'),
-            3: _('March'),
-            4: _('April'),
-            5: _('May'),
-            6: _('June'),
-            7: _('July'),
-            8: _('August'),
-            9: _('September'),
-            10: _('October'),
-            11: _('November'),
-            12: _('December'),
-        }
-        return f'{months[self.invoice_date.month]} {self.invoice_date.day}, {self.invoice_date.year}'
+        return f'{self._get_months(self.invoice_date.month)} {self.invoice_date.day}, {self.invoice_date.year}'
+
+    def _get_vendor_invoice_period(self):
+        self.ensure_one()
+        return f'{self._get_months(self.invoice_date.month)} {self.invoice_date.year}'
 
     def _get_total_amount_in_word_pe(self):
         self.ensure_one()
@@ -62,7 +69,7 @@ class AccountMove(models.Model):
                 description = product_tag_id and product_tag_id.name or product_id.name
                 self.env['employee.bill.sign.line'].create({
                     'move_id': rec.id,
-                    'period': rec.invoice_date.strftime('%B %Y'),
+                    'period': rec._get_vendor_invoice_period(),
                     'description': description,
                     'amount': rec.amount_total,
                     'price': first_line.price_unit,

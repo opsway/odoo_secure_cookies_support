@@ -160,7 +160,7 @@
                                 <tr>
                                     <th><t t-esc="line_index + 1"/></th>
                                     <td><t t-esc="line.description"/></td>
-                                    <td><t t-esc="line.period"/></td>
+                                    <td><t t-esc="bill._get_vendor_invoice_period()"/></td>
                                     <td><t t-esc="line.quantity"/></td>
                                     <td><t t-esc="line.price"/></td>
                                     <td><t t-esc="line.amount"/></td>

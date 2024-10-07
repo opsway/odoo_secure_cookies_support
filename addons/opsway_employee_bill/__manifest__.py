@@ -1,6 +1,6 @@
 {
     'name': 'Opsway Employee Bill',
-    'version': '17.0.0.6.0',
+    'version': '17.0.0.7.0',
     'category': 'Accounting/Accounting',
     'summary': 'Bill Report for Opsway',
     'description': 'Bill report for employee',
