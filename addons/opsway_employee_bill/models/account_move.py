@@ -16,7 +16,17 @@ class AccountMove(models.Model):
     service_agreement = fields.Char(
         translate=True,
     )
-    invoice_number = fields.Char()
+    employee_product_tag_id = fields.Many2one(
+        'product.tag',
+        compute='_compute_employee_product_tag_id',
+        store=True,
+    )
+
+    @api.depends('line_ids.product_id')
+    def _compute_employee_product_tag_id(self):
+        for rec in self:
+            rec.employee_product_tag_id = bool(rec.line_ids and rec.line_ids[0].product_id.product_tag_ids) and \
+                                          rec.line_ids[0].product_id.product_tag_ids[0]
 
     @api.depends('partner_id.lang')
     def _compute_need_multi_lang_report(self):
@@ -64,13 +74,10 @@ class AccountMove(models.Model):
                 lang = rec.partner_id.lang
                 rec = self.with_context(lang=lang)
                 first_line = rec.line_ids and rec.line_ids[0]
-                product_id = first_line.product_id
-                product_tag_id = product_id.product_tag_ids and product_id.product_tag_ids[0]
-                description = product_tag_id and product_tag_id.name or product_id.name
                 self.env['employee.bill.sign.line'].create({
                     'move_id': rec.id,
                     'period': rec._get_vendor_invoice_period(),
-                    'description': description,
                     'amount': rec.amount_total,
+                    'description': rec.employee_product_tag_id.name or first_line.product_id.name,
                     'price': first_line.price_unit,
                 })

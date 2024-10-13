@@ -5,14 +5,15 @@ class EmployeeBillSignLine(models.Model):
     _name = 'employee.bill.sign.line'
     _description = 'Employee Bill Sign Line'
 
-    description = fields.Char(translate=True)
+    move_id = fields.Many2one('account.move', string='Move')
+
+    description = fields.Char(related='move_id.employee_product_tag_id.name')
     period = fields.Char(readonly=True)
     quantity = fields.Float(compute='_compute_quantity', store=True)
     currency_field = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
     price = fields.Monetary(currency_field='currency_field')
     amount = fields.Monetary(string='Amount', currency_field='currency_field')
 
-    move_id = fields.Many2one('account.move', string='Move')
 
     @api.depends('price', 'amount')
     def _compute_quantity(self):
