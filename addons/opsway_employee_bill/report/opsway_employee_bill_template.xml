@@ -49,7 +49,7 @@
                 <!-- Invoice Number and Date -->
                 <div class="row">
                     <div class="col-md-auto">
-                        <p>Invoice # <t t-esc="bill.invoice_number or bill.name"/></p>
+                        <p>Invoice # <t t-esc="bill.name.replace('BILL/', '')"/></p>
                     </div>
                 </div>
                 <br/><br/><br/>
@@ -64,7 +64,7 @@
                     <div class="col-md-auto">
                         <span><strong>Contractor</strong></span>
                         <div>
-                            <span><t t-esc="bill.partner_id.bill_name"/></span>
+                            <span><t t-esc="bill.partner_id.name"/></span>
                         </div>
                         <div>
                             <span>Tax Number: <t t-esc="bill.partner_id.vat"/></span>
@@ -81,7 +81,7 @@
                     <div class="col-md-auto">
                         <span><strong>Customer</strong></span>
                         <div>
-                            <span>Company Name: <t t-esc="bill.company_id.partner_id.bill_name"/></span>
+                            <span>Company Name: <t t-esc="bill.company_id.partner_id.name"/></span>
                         </div>
                         <div>
                             <span>Company NIP: <t t-esc="bill.company_id.vat"/></span>
