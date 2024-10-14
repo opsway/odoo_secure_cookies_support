@@ -81,13 +81,14 @@
                     <div class="col-md-auto">
                         <span><strong>Customer</strong></span>
                         <div>
-                            <span>Company Name: <t t-esc="bill.company_id.partner_id.name"/></span>
+                            <!--temporary company name from street2-->
+                            <span>Company Name: <t t-esc="bill.company_id.partner_id.street2"/></span>
                         </div>
                         <div>
                             <span>Company NIP: <t t-esc="bill.company_id.vat"/></span>
                         </div>
                         <div>
-                            <span>Address: <t t-esc="bill.company_id.partner_id._get_address_data()"/></span>
+                            <span>Address: <t t-esc="bill.company_id._get_address_data()"/></span>
                         </div>
                         <span>Email: <t t-esc="bill.company_id.partner_id.email"/></span>
                     </div>
@@ -159,7 +160,7 @@
                                 <t t-set="line" t-value="line.with_context(lang=lang)"/>
                                 <tr>
                                     <th><t t-esc="line_index + 1"/></th>
-                                    <td><t t-esc="line.description"/></td>
+                                    <td><t t-esc="line._get_report_description()"/></td>
                                     <td><t t-esc="bill._get_vendor_invoice_period()"/></td>
                                     <td><t t-esc="line.quantity"/></td>
                                     <td><t t-esc="line.price"/></td>
@@ -185,7 +186,7 @@
                 <br/><br/>
                 <!-- Signature Section -->
                 <p t-attf-style="text-align: center;">Contractor: ____________________ (<t
-                        t-esc="bill.partner_id.bill_name"/>)
+                        t-esc="bill.partner_id.name"/>)
                 </p>
             </div>
         </t>
