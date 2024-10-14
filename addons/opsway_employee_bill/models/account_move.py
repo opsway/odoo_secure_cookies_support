@@ -69,8 +69,8 @@ class AccountMove(models.Model):
 
     def action_post(self):
         res = super(AccountMove, self).action_post()
-        if self.move_type == 'in_invoice':
-            for rec in self:
+        for rec in self:
+            if rec.move_type == 'in_invoice':
                 lang = rec.partner_id.lang
                 rec = self.with_context(lang=lang)
                 first_line = rec.line_ids and rec.line_ids[0]
@@ -81,3 +81,4 @@ class AccountMove(models.Model):
                     'description': rec.employee_product_tag_id.name or first_line.product_id.name,
                     'price': first_line.price_unit,
                 })
+        return res
