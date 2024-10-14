@@ -16,17 +16,27 @@ class AccountMove(models.Model):
     service_agreement = fields.Char(
         translate=True,
     )
+    employee_bill_first_line_id = fields.Many2one(
+        'account.move.line',
+        compute='_compute_employee_bill_first_line_id',
+        store=True,
+    )
     employee_product_tag_id = fields.Many2one(
         'product.tag',
         compute='_compute_employee_product_tag_id',
         store=True,
     )
 
-    @api.depends('line_ids.product_id')
+    @api.depends('invoice_line_ids.sequence')
+    def _compute_employee_bill_first_line_id(self):
+        for rec in self:
+            rec.employee_bill_first_line_id = rec.invoice_line_ids and rec.invoice_line_ids.sorted('sequence')[0]
+
+    @api.depends('employee_bill_first_line_id')
     def _compute_employee_product_tag_id(self):
         for rec in self:
-            rec.employee_product_tag_id = bool(rec.line_ids and rec.line_ids[0].product_id.product_tag_ids) and \
-                                          rec.line_ids[0].product_id.product_tag_ids[0]
+            rec.employee_product_tag_id = bool(rec.employee_bill_first_line_id) and \
+                                          rec.employee_bill_first_line_id.product_id.product_tag_ids[0]
 
     @api.depends('partner_id.lang')
     def _compute_need_multi_lang_report(self):
@@ -73,11 +83,10 @@ class AccountMove(models.Model):
             for rec in self:
                 lang = rec.partner_id.lang
                 rec = self.with_context(lang=lang)
-                first_line = rec.line_ids and rec.line_ids[0]
                 self.env['employee.bill.sign.line'].create({
                     'move_id': rec.id,
                     'period': rec._get_vendor_invoice_period(),
                     'amount': rec.amount_total,
-                    'description': rec.employee_product_tag_id.name or first_line.product_id.name,
-                    'price': first_line.price_unit,
+                    'description': rec.employee_product_tag_id.name or rec.employee_bill_first_line_id.product_id.name,
+                    'price': rec.employee_bill_first_line_id.price_unit,
                 })
