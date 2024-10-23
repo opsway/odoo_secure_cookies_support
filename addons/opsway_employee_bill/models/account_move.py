@@ -16,17 +16,29 @@ class AccountMove(models.Model):
     service_agreement = fields.Char(
         translate=True,
     )
+    employee_bill_first_line_id = fields.Many2one(
+        'account.move.line',
+        compute='_compute_employee_bill_first_line_id',
+        store=True,
+    )
     employee_product_tag_id = fields.Many2one(
         'product.tag',
         compute='_compute_employee_product_tag_id',
         store=True,
     )
 
-    @api.depends('line_ids.product_id')
+    @api.depends('invoice_line_ids.sequence')
+    def _compute_employee_bill_first_line_id(self):
+        for rec in self:
+            rec.employee_bill_first_line_id = rec.invoice_line_ids and rec.invoice_line_ids.sorted('sequence')[0]
+
+    @api.depends('employee_bill_first_line_id')
     def _compute_employee_product_tag_id(self):
         for rec in self:
-            rec.employee_product_tag_id = bool(rec.line_ids and rec.line_ids[0].product_id.product_tag_ids) and \
-                                          rec.line_ids[0].product_id.product_tag_ids[0]
+            has_tag = bool(
+                rec.employee_bill_first_line_id and rec.employee_bill_first_line_id.product_id and
+                rec.employee_bill_first_line_id.product_id.product_tag_ids)
+            rec.employee_product_tag_id = has_tag and rec.employee_bill_first_line_id.product_id.product_tag_ids[0]
 
     @api.depends('partner_id.lang')
     def _compute_need_multi_lang_report(self):
@@ -67,18 +79,22 @@ class AccountMove(models.Model):
         self.ensure_one()
         return self.currency_id.amount_to_text(self.amount_total).replace(',', '').capitalize()
 
+    def _get_pe_report_filename(self):
+        """Name of the PDF file: Invoice_<Vendor>_MM/YY """
+        self.ensure_one()
+        return f'Invoice_{self.partner_id.name}_{self.invoice_date.strftime("%m/%y")}'
+
     def action_post(self):
         res = super(AccountMove, self).action_post()
         for rec in self:
             if rec.move_type == 'in_invoice':
                 lang = rec.partner_id.lang
                 rec = self.with_context(lang=lang)
-                first_line = rec.line_ids and rec.line_ids[0]
                 self.env['employee.bill.sign.line'].create({
                     'move_id': rec.id,
                     'period': rec._get_vendor_invoice_period(),
                     'amount': rec.amount_total,
-                    'description': rec.employee_product_tag_id.name or first_line.product_id.name,
-                    'price': first_line.price_unit,
+                    'description': rec.employee_product_tag_id.name or rec.employee_bill_first_line_id.product_id.name,
+                    'price': rec.employee_bill_first_line_id.price_unit,
                 })
         return res
