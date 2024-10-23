@@ -29,6 +29,7 @@
         <field name="report_name">opsway_employee_bill.report_opsway_employee_bill_template</field>
         <field name="report_file">opsway_employee_bill.report_opsway_employee_bill_template</field>
         <field name="attachment"/>
+        <field name="print_report_name">(object._get_pe_report_filename())</field>
         <field name="binding_model_id" ref="model_account_move"/>
         <field name="binding_type">report</field>
         <field name="paperformat_id" ref="account.paperformat_euro_bank_statement"/>
