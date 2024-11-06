@@ -4,7 +4,9 @@
     'category': 'Accounting/Accounting',
     'summary': 'Bill Report for Opsway',
     'description': 'Bill report for employee',
-    'depends': ['account'],
+    'depends': [
+        'account',
+    ],
     'data': [
         'security/ir.model.access.csv',
         'views/account_move.xml',
