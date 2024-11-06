@@ -4,6 +4,7 @@
     'category': 'Accounting/Accounting',
     'summary': 'Bill Report for Opsway',
     'description': 'Bill report for employee',
+    'author': 'OpsWay',
     'depends': [
         'account',
     ],

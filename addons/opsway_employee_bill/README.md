@@ -31,10 +31,9 @@ How to work
  
  - if Product in Vendor Bill doesn't correlate with a permitted activity type supposed to be included in PE Invoice, configure and add a           corresponding Product Template tag. Add Product Template tag translation.
 
-
- Example: ![](./point_4.png)
+Example: ![](./static/description/point_4.png)
 Note: Product in PE Invoice is computed based on Product set in the first line in the Vendor Bill.
-5. Add Service Agreement reference in the Vendor Bill: go to Bill (Sign) tab In the Vendor Bill and set the value in Service Agreement field.      Add a translation (if needed). 
-![](./point_5.png)
+5. Add Service Agreement reference in the Vendor Bill: go to Bill (Sign) tab In the Vendor Bill and set the value in Service Agreement field.      Add a translation (if needed).
+   ![](./static/description/point_5.png)
 6. Confirm Vendor Bill for the system to compute the data to propagate in PE Invoice report. Print report.
- 
+   ![](./static/description/point_6.png)

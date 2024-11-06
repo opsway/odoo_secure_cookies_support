@@ -118,9 +118,10 @@ class TestPEEmployee(TransactionCase):
         self.assertIn(b'May 15, 2024', report_en[0], "Invoice date not found in report")
         self.assertIn(b'2530.58', report_en[0], "Total amount not found in report")
         self.assertIn(b'Total: Two thousand five hundred and thirty dollars and fifty-eight cents', report_en[0],
-                        "Total amount in words not found in report")
-        self.assertIn('Total: Двi тисячi п&#39;ятсот тридцять dollars і п&#39;ятдесят вiсiм cents'.encode('utf-8'), report_en[0],
-                        "Total amount in words not found in report")
+                      "Total amount in words not found in report")
+        self.assertIn('Total: Двi тисячi п&#39;ятсот тридцять dollars і п&#39;ятдесят вiсiм cents'.encode('utf-8'),
+                      report_en[0],
+                      "Total amount in words not found in report")
         # check bank account in report
         self.assertIn(b'123456789', report_en[0], "Bank account not found in report")
         self.assertIn(b'Test Bank', report_en[0], "Bank name not found in report")
