@@ -1,4 +1,4 @@
-from odoo import models, fields, api, _
+from odoo import models, fields, api, _, tools
 
 
 class AccountMove(models.Model):
@@ -78,7 +78,11 @@ class AccountMove(models.Model):
 
     def _get_total_amount_in_word_pe(self):
         self.ensure_one()
-        return self.currency_id.amount_to_text(self.amount_total).replace(',', '').capitalize()
+        res = self.currency_id.amount_to_text(self.amount_total).replace(',', '').capitalize()
+        lang = tools.get_lang(self.env)
+        if lang.code == 'uk_UA':
+            res = res.replace('and', 'і')
+        return res
 
     def _get_pe_report_filename(self):
         """Name of the PDF file: Invoice_<Vendor>_MM/YY """
