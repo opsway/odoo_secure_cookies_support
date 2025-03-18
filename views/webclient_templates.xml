@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<odoo>
+    <template id="secure_cookies_frontend_layout" name="Frontend Layout (tz)" inherit_id="web.frontend_layout">
+        <xpath expr="//script[@t-nocache='Session information should always be up to date.']" position="replace">
+            <script t-nocache="Session information should always be up to date." type="text/javascript">
+                odoo.__session_info__ = <t t-out="json.dumps(request.env['ir.http'].get_frontend_session_info())"/>;
+                if (!/(^|;\s)tz=/.test(document.cookie)) {
+                    const userTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                    if (odoo.__session_info__.secure_cookies    ) {
+                        document.cookie = `tz=${userTZ}; path=/; Secure; SameSite=Strict`;
+                    } else {
+                        document.cookie = `tz=${userTZ}; path=/`;
+                    }
+                }
+            </script>
+        </xpath>
+    </template>
+</odoo>
