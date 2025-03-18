@@ -48,23 +48,3 @@ Object.defineProperty(Document.prototype, 'cookie', {
         return originalDocCookieSet.call(this, secureValue);
     }
 });
-
-
-// Interception fetch
-const originalFetch = window.fetch;
-window.fetch = function(...args) {
-    if (args[1] && args[1].headers) {
-        const headers = args[1].headers;
-        if (headers instanceof Headers) {
-            const cookieHeader = headers.get('cookie');
-            if (cookieHeader) {
-                headers.set('cookie', secureCookie(cookieHeader));
-            }
-        } else if (typeof headers === 'object') {
-            if (headers.cookie) {
-                headers.cookie = secureCookie(headers.cookie);
-            }
-        }
-    }
-    return originalFetch.apply(this, args);
-};
