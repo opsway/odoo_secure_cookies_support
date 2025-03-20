@@ -1,4 +1,4 @@
-from odoo import models, fields, api, _
+from odoo import models, fields, api, _, tools
 
 
 class AccountMove(models.Model):
@@ -69,20 +69,25 @@ class AccountMove(models.Model):
 
     def _get_vendor_invoice_date(self):
         self.ensure_one()
-        return f'{self._get_months(self.invoice_date.month)} {self.invoice_date.day}, {self.invoice_date.year}'
+
+        return f'{self._get_months(self.date.month)} {self.date.day}, {self.date.year}'
 
     def _get_vendor_invoice_period(self):
         self.ensure_one()
-        return f'{self._get_months(self.invoice_date.month)} {self.invoice_date.year}'
+        return f'{self._get_months(self.date.month)} {self.date.year}'
 
     def _get_total_amount_in_word_pe(self):
         self.ensure_one()
-        return self.currency_id.amount_to_text(self.amount_total).replace(',', '').capitalize()
+        res = self.currency_id.amount_to_text(self.amount_total).replace(',', '').capitalize()
+        lang = tools.get_lang(self.env)
+        if lang.code == 'uk_UA':
+            res = res.replace('and', 'і')
+        return res
 
     def _get_pe_report_filename(self):
         """Name of the PDF file: Invoice_<Vendor>_MM/YY """
         self.ensure_one()
-        return f'Invoice_{self.partner_id.name}_{self.invoice_date.strftime("%m/%y")}'
+        return f'Invoice_{self.partner_id.name}_{self.date.strftime("%m/%y")}'
 
     def action_post(self):
         res = super(AccountMove, self).action_post()
