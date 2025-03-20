@@ -5,7 +5,7 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
     bill_name = fields.Char(translate=True)
 
-    name = fields.Char(translate=True, tracking=True, index=True, default_export_compatible=True)
+    name = fields.Char(translate=False, tracking=True, index=True, default_export_compatible=True)
     city = fields.Char(translate=True)
     street = fields.Char(translate=True)
     street2 = fields.Char(translate=True)
