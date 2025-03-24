@@ -10,13 +10,13 @@
                         <field name="service_agreement"/>
                     </group>
                     <field name="employee_bill_sign_ids">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="description"/>
                             <field name="period"/>
                             <field name="quantity"/>
                             <field name="price"/>
                             <field name="amount"/>
-                        </tree>
+                        </list>
                     </field>
                 </page>
             </xpath>
