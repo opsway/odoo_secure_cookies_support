@@ -6,5 +6,7 @@ class ValidateAccountMove(models.TransientModel):
 
     def default_get(self, fields_list):
         result = super().default_get(fields_list)
-        self.env['account.move'].browse(result['move_ids'][0][2])._validate_partner_bank_id()
+        move_ids = result.get('move_ids', [(None, None, [])])[0][2]
+        if move_ids:
+            self.env['account.move'].browse(move_ids)._validate_partner_bank_id()
         return result
