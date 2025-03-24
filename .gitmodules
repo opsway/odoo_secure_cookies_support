@@ -1,4 +1,8 @@
 [submodule "submodules"]
 	path = submodules
 	url = git@github.com:opsway/odoo-modules.git
-	branch = v17
+	branch = v18
+[submodule "opsway/odoo_secure_cookies_support"]
+	path = opsway/odoo_secure_cookies_support
+	url = git@github.com:opsway/odoo_secure_cookies_support.git
+	branch = v18

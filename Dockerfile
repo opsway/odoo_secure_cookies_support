@@ -1,4 +1,4 @@
-FROM ubuntu:jammy
+FROM ubuntu:noble
 
 SHELL ["/bin/bash", "-xo", "pipefail", "-c"]
 
@@ -54,7 +54,7 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
 
 # install latest postgresql-client
-RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ jammy-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
+RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ noble-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
     && GNUPGHOME="$(mktemp -d)" \
     && export GNUPGHOME \
     && repokey='B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8' \
@@ -71,9 +71,9 @@ RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ jammy-pgdg main' > /etc/a
 RUN npm install -g rtlcss
 
 # Install Odoo
-ENV ODOO_VERSION 17.0
-ARG ODOO_RELEASE=20240513
-ARG ODOO_SHA=5ec8f5007ad564279fd06edfe90cf197711fcfd3
+ENV ODOO_VERSION 18.0
+ARG ODOO_RELEASE=20250320
+ARG ODOO_SHA=f2b9056ce21821292062f3d753dc38dacc3afe4d
 RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}.${ODOO_RELEASE}_all.deb \
     && echo "${ODOO_SHA} odoo.deb" | sha1sum -c - \
     && apt-get update \
@@ -89,12 +89,16 @@ RUN chown odoo /etc/odoo/odoo.conf \
     && chown -R odoo /mnt/extra-addons
 RUN mkdir -p /mnt/submodules \
         && chown -R odoo /mnt/submodules
-VOLUME ["/var/lib/odoo", "/mnt/extra-addons", "/mnt/submodules"]
+RUN mkdir -p /mnt/enterprise \
+        && chown -R odoo /mnt/enterprise
+RUN mkdir -p /mnt/opsway \
+        && chown -R odoo /mnt/opsway
+VOLUME ["/var/lib/odoo", "/mnt/extra-addons", "/mnt/submodules", "/mnt/opsway", "/mnt/enterprise"]
 
 COPY requirements.txt /opt/
 COPY requirements-dev.txt /opt/
-RUN pip3 install -r /opt/requirements.txt && rm /opt/requirements.txt
-RUN pip3 install -r /opt/requirements-dev.txt && rm /opt/requirements-dev.txt
+RUN pip3 install --break-system-packages -r /opt/requirements.txt && rm /opt/requirements.txt
+RUN pip3 install --break-system-packages -r /opt/requirements-dev.txt && rm /opt/requirements-dev.txt
 
 # Expose Odoo services
 EXPOSE 8069 8071 8072
