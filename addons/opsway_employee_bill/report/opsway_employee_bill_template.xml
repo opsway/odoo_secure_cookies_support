@@ -52,7 +52,7 @@
                         <p>Invoice # <t t-esc="bill.name.replace('BILL/', '')"/></p>
                     </div>
                 </div>
-                <br/><br/><br/>
+                <br/><br/>
                 <div class="row">
                     <div class="col-md-auto">
                         <p>Date of Invoice: <t t-esc="bill._get_vendor_invoice_date()"/></p>
