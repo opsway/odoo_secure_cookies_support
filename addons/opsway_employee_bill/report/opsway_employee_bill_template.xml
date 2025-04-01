@@ -179,12 +179,12 @@
                         <span>Total: <t t-esc="bill._get_total_amount_in_word_pe()"/></span>
                     </div>
                 </div>
-                <br/><br/>
+                <br/>
                 <!-- Terms and Conditions -->
                 <div class="terms" t-attf-style="text-align: left;">
                     <p><t t-esc="bill.company_id.default_terms"/></p>
                 </div>
-                <br/><br/>
+                <br/>
                 <!-- Signature Section -->
                 <p t-attf-style="text-align: center;">Contractor: ____________________ (<t
                         t-esc="bill.partner_id.name"/>)
