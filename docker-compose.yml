@@ -25,6 +25,7 @@ services:
       - ./addons:/mnt/extra-addons
       - ./submodules:/mnt/submodules
       - ./opsway:/mnt/opsway
+      - ../enterprise:/mnt/enterprise  # Adjust this path to your enterprise folder
       - ./odoo.conf:/etc/odoo/odoo.conf
       - odoo_data:/var/lib/odoo
     environment:
