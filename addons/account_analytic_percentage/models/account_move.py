@@ -3,15 +3,23 @@ from odoo import models, fields, api
 
 class AccountMove(models.Model):
     _inherit = 'account.move'
+    
+    def _get_default_analytic_plan(self):
+        """Get the default analytical plan with complete_name 'Projects / Cider'"""
+        plan = self.env['account.analytic.plan'].search([
+            ('complete_name', '=', 'Projects / Cider')
+        ], limit=1)
+        return plan.id if plan else False
 
     analytic_plan_id = fields.Many2one(
         'account.analytic.plan',
         string='Analytical Plan',
-        help='Select the analytical plan to calculate percentage for'
+        help='Select the analytical plan to calculate percentage for',
+        default=lambda self: self._get_default_analytic_plan()
     )
     
     analytic_plan_percentage = fields.Float(
-        string='Analytical Plan Percentage',
+        string='Analytical Plan Percentage (%)',
         compute='_compute_analytic_plan_percentage',
         store=True,
         digits='Product Price',
