@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  opsway-db:
+    image: postgres:13
+    container_name: opsway-postgres-odoo
+    environment:
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+
+  opsway-odoo:
+    build: .
+    container_name: opsway-odoo
+    depends_on:
+      - opsway-db
+    ports:
+      - "8069:8069"
+    volumes:
+      - ./addons:/mnt/extra-addons
+      - ./submodules:/mnt/submodules
+      - ./opsway:/mnt/opsway
+      - ./odoo.conf:/etc/odoo/odoo.conf
+      - odoo_data:/var/lib/odoo
+    environment:
+      - HOST=opsway-db
+      - PORT=5432
+      - USER=odoo
+      - PASSWORD=odoo
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  odoo_data:
