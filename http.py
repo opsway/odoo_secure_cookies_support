@@ -27,4 +27,3 @@ _old_response_set_cookie = Response.set_cookie
 
 FutureResponse.set_cookie = _set_cookie_wrapper(_old_future_response_set_cookie, werkzeug.Response)
 Response.set_cookie = _set_cookie_wrapper(_old_response_set_cookie, Response)
-
