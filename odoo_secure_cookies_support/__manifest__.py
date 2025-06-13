@@ -1,12 +1,12 @@
 {
     'name': "Secure Cookies Support",
-    'version': "18.0.0.1.0",
+    'version': "18.0.1.0.0",
     'summary': "Secure Cookies Support",
-    'description': "Secure Cookies Support",
-    'author': "Lumirang",
-    'website': "https://lumirang.com",
+    'description': "Adds the Secure flag to every session and CSRF cookie served by Odoo",
+    'author': "OpsWay",
+    'website': "https://opsway.com",
     'category': "Quality",
-    'license': "Other proprietary",
+    'license': "LGPL-3",
     'depends': ['web'],
     'data': [
         'data/ir_config_parameter.xml',
@@ -14,14 +14,13 @@
     ],
     'assets': {
         'web.assets_backend': [
-            'odoo_secure_cookies_support/static/src/core/browser/cookie.js',
+            'odoo_secure_cookies_support/static/src/js/core/browser/cookie.js',
         ],
         'web.assets_frontend': [
-            'odoo_secure_cookies_support/static/src/core/browser/cookie.js',
+            'odoo_secure_cookies_support/static/src/js/core/browser/cookie.js',
         ],
     },
     'installable': True,
     'application': True,
     'auto_install': False,
-    'sequence': 5,
 }
