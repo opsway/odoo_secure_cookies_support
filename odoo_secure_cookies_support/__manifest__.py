@@ -14,10 +14,10 @@
     ],
     'assets': {
         'web.assets_backend': [
-            'odoo_secure_cookies_support/static/src/core/browser/cookie.js',
+            'odoo_secure_cookies_support/static/src/js/core/browser/cookie.js',
         ],
         'web.assets_frontend': [
-            'odoo_secure_cookies_support/static/src/core/browser/cookie.js',
+            'odoo_secure_cookies_support/static/src/js/core/browser/cookie.js',
         ],
     },
     'installable': True,
