@@ -20,6 +20,7 @@
             'odoo_secure_cookies_support/static/src/js/core/browser/cookie.js',
         ],
     },
+    'images': ['static/description/banner.png'],
     'installable': True,
     'application': True,
     'auto_install': False,
