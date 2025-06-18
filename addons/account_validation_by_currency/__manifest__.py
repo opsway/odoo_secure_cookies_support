@@ -5,7 +5,7 @@
     'author': 'OpsWay',
     'description': "Validate on posting invoice that recipient bank currency is equal to invoice currency",
     'depends': [
-        'account',
+        'base', 'account',
     ],
     'category': 'Tools',
     'sequence': 10,
