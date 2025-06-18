@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="base.EUR" model="res.currency">
+            <field name="active" eval="True"/>
+        </record>
+        <record id="demo_bank_eur" model="res.partner.bank">
+            <field name="acc_number">BANK_EUR</field>
+            <field name="partner_id" ref="base.main_partner"/>
+            <field name="currency_id" ref="base.EUR"/>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
+        <record id="demo_bank_usd" model="res.partner.bank">
+            <field name="acc_number">BANK_USD</field>
+            <field name="partner_id" ref="base.main_partner"/>
+            <field name="currency_id" ref="base.USD"/>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
+
+        <record id="demo_without_partner_bank_inv" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="name">Demo Invoice Without Partner Bank</field>
+            <field name="state">draft</field>
+            <field name="partner_id" ref="base.res_partner_1"/>
+            <field name="currency_id" ref="base.USD"/>
+            <field name="invoice_date" eval="datetime.now()"/>
+            <field name="invoice_line_ids" eval="[(0, 0, {
+                'name': 'Demo product line',
+                'quantity': 1,
+                'price_unit': 100.0,
+            })]"/>
+            <field name="partner_bank_id" eval="False"/>
+        </record>
+
+        <record id="demo_currency_mismatch_inv" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="name">Demo Currency Mismatch Invoice</field>
+            <field name="state">draft</field>
+            <field name="partner_id" ref="base.res_partner_1"/>
+            <field name="currency_id" ref="base.USD"/>
+            <field name="invoice_date" eval="datetime.now()"/>
+            <field name="invoice_line_ids" eval="[(0, 0, {
+                'name': 'Demo product line',
+                'quantity': 1,
+                'price_unit': 200.0,
+            })]"/>
+            <field name="partner_bank_id" ref="demo_bank_eur"/>
+        </record>
+
+        <record id="demo_correct_inv" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="name">Demo Correct Invoice</field>
+            <field name="state">draft</field>
+            <field name="partner_id" ref="base.res_partner_1"/>
+            <field name="currency_id" ref="base.USD"/>
+            <field name="invoice_date" eval="datetime.now()"/>
+            <field name="invoice_line_ids" eval="[(0, 0, {
+                'name': 'Demo product line',
+                'quantity': 1,
+                'price_unit': 300.0,
+            })]"/>
+            <field name="partner_bank_id" ref="demo_bank_usd"/>
+        </record>
+
+        <record id="demo_currency_mismatch_inv_posted" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="name">Demo Currency Mismatch Invoice Posted</field>
+            <field name="state">draft</field>
+            <field name="partner_id" ref="base.res_partner_1"/>
+            <field name="currency_id" ref="base.USD"/>
+            <field name="invoice_date" eval="datetime.now()"/>
+            <field name="invoice_line_ids" eval="[(0, 0, {
+                'name': 'Demo product line',
+                'quantity': 1,
+                'price_unit': 400.0,
+            })]"/>
+            <field name="partner_bank_id" ref="demo_bank_eur"/>
+        </record>
+        <function model="account.move" name="action_post"
+            eval="[[ref('demo_currency_mismatch_inv_posted')]]"
+            context="{'demo': True}"/>
+    </data>
+</odoo>
