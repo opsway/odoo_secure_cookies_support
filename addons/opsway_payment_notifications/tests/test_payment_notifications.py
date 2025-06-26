@@ -1,20 +1,21 @@
-from odoo.tests.common import TransactionCase
-from odoo.tests import tagged
 from unittest.mock import patch
 
+from odoo.tests.common import TransactionCase
+from odoo.tests import tagged
 
-@tagged('post_install', '-at_install', 'payment_notifications_test_ai_564')
+
+@tagged('post_install', '-at_install', 'payment_notifications_test_ai_564', 'all_run')
 class TestPaymentNotifications(TransactionCase):
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        
+
         # Enable payment notifications
         cls.env['ir.config_parameter'].sudo().set_param(
             'opsway_payment_notifications.enabled', True
         )
-        
+
         # Create test users
         cls.test_user_1 = cls.env['res.users'].with_context(no_reset_password=True).create({
             'name': 'Test User 1',
@@ -23,37 +24,37 @@ class TestPaymentNotifications(TransactionCase):
         })
         cls.test_user_2 = cls.env['res.users'].with_context(no_reset_password=True).create({
             'name': 'Test User 2',
-            'login': 'testuser2', 
+            'login': 'testuser2',
             'email': 'testuser2@example.com',
         })
-        
+
         # Create test partner
         cls.test_partner = cls.env['res.partner'].create({
             'name': 'Test Partner',
             'email': 'testpartner@example.com',
         })
-        
+
         # Create bank journal and account
         cls.bank_journal = cls.env['account.journal'].create({
             'name': 'Test Bank',
             'type': 'bank',
             'code': 'TBNK',
         })
-        
+
         # Create cash journal
         cls.cash_journal = cls.env['account.journal'].create({
             'name': 'Test Cash',
-            'type': 'cash', 
+            'type': 'cash',
             'code': 'TCSH',
         })
-        
+
         # Create sale journal for invoice test
         cls.sale_journal = cls.env['account.journal'].create({
             'name': 'Test Sale',
-            'type': 'sale', 
+            'type': 'sale',
             'code': 'TSALE',
         })
-        
+
         # Create accounts for testing
         cls.bank_account = cls.env['account.account'].create({
             'name': 'Test Bank Account',
@@ -65,18 +66,18 @@ class TestPaymentNotifications(TransactionCase):
             'code': 'TINC001',
             'account_type': 'income',
         })
-        
+
         # Set default account for bank journal
         cls.bank_journal.default_account_id = cls.bank_account
         cls.cash_journal.default_account_id = cls.bank_account
-        
+
         # Create notification settings
         cls.all_payments_setting = cls.env['payment.notification.settings'].create({
             'name': 'All Payments Notification',
             'notification_type': 'all_payments',
             'all_payment_user_ids': [(6, 0, [cls.test_user_1.id])],
         })
-        
+
         cls.partner_specific_setting = cls.env['payment.notification.settings'].create({
             'name': 'Partner Specific Notification',
             'notification_type': 'partner_specific',
@@ -100,7 +101,7 @@ class TestPaymentNotifications(TransactionCase):
                 }),
             ],
         })
-        
+
         self.assertTrue(move._should_send_payment_notification())
 
     def test_should_send_notification_cash_journal(self):
@@ -118,7 +119,7 @@ class TestPaymentNotifications(TransactionCase):
                 }),
             ],
         })
-        
+
         self.assertTrue(move._should_send_payment_notification())
 
     def test_should_not_send_notification_invoice(self):
@@ -135,7 +136,7 @@ class TestPaymentNotifications(TransactionCase):
                 }),
             ],
         })
-        
+
         self.assertFalse(move._should_send_payment_notification())
 
     def test_should_not_send_notification_no_debit(self):
@@ -153,7 +154,7 @@ class TestPaymentNotifications(TransactionCase):
                 }),
             ],
         })
-        
+
         self.assertFalse(move._should_send_payment_notification())
 
     def test_get_notification_users_all_payments(self):
@@ -186,7 +187,7 @@ class TestPaymentNotifications(TransactionCase):
                 }),
             ],
         })
-        
+
         move.action_post()
         mock_send.assert_called_once()
 
@@ -196,8 +197,10 @@ class TestPaymentNotifications(TransactionCase):
         self.env['ir.config_parameter'].sudo().set_param(
             'opsway_payment_notifications.enabled', False
         )
-        
-        with patch('odoo.addons.opsway_payment_notifications.models.account_move.AccountMove._send_payment_notification') as mock_send:
+
+        with patch(
+            'odoo.addons.opsway_payment_notifications.models.account_move.AccountMove._send_payment_notification'
+        ) as mock_send:
             move = self.env['account.move'].create({
                 'journal_id': self.bank_journal.id,
                 'line_ids': [
@@ -211,10 +214,10 @@ class TestPaymentNotifications(TransactionCase):
                     }),
                 ],
             })
-            
+
             move.action_post()
             mock_send.assert_not_called()
-        
+
         # Re-enable for other tests
         self.env['ir.config_parameter'].sudo().set_param(
             'opsway_payment_notifications.enabled', True
