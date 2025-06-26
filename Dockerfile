@@ -82,9 +82,7 @@ RUN mkdir -p /mnt/submodules \
         && chown -R odoo /mnt/submodules
 RUN mkdir -p /mnt/enterprise \
         && chown -R odoo /mnt/enterprise
-RUN mkdir -p /mnt/opsway \
-        && chown -R odoo /mnt/opsway
-VOLUME ["/var/lib/odoo", "/mnt/extra-addons", "/mnt/addons-third-party", "/mnt/submodules", "/mnt/opsway", "/mnt/enterprise"]
+VOLUME ["/var/lib/odoo", "/mnt/extra-addons", "/mnt/addons-third-party", "/mnt/submodules", "/mnt/enterprise"]
 
 COPY requirements.txt /opt/
 COPY requirements-dev.txt /opt/

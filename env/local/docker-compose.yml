@@ -13,7 +13,6 @@ services:
       - ../../addons:/mnt/extra-addons
       - ../../submodules:/mnt/submodules
       - ../../enterprise:/mnt/enterprise
-      - ../../opsway:/mnt/opsway
       - ./odoo.conf:/etc/odoo/odoo.conf
     environment:
       - HOST=mydb
