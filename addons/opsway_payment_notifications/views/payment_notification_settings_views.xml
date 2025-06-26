@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        
+
         <!-- Tree View -->
         <record id="payment_notification_settings_tree_view" model="ir.ui.view">
             <field name="name">payment.notification.settings.tree</field>
@@ -15,7 +15,7 @@
                 </list>
             </field>
         </record>
-        
+
         <!-- Form View -->
         <record id="payment_notification_settings_form_view" model="ir.ui.view">
             <field name="name">payment.notification.settings.form</field>
@@ -35,7 +35,7 @@
                                 <field name="company_id" groups="base.group_multi_company"/>
                             </group>
                         </group>
-                        
+
                         <notebook>
                             <page string="All Payments" invisible="notification_type != 'all_payments'">
                                 <field name="all_payment_user_ids">
@@ -68,7 +68,7 @@
                 </form>
             </field>
         </record>
-        
+
         <!-- Action -->
         <record id="payment_notification_settings_action" model="ir.actions.act_window">
             <field name="name">Payment Notification Settings</field>
@@ -83,7 +83,7 @@
                 </p>
             </field>
         </record>
-        
+
         <!-- Menu -->
         <menuitem
             id="payment_notification_settings_menu"
@@ -91,6 +91,6 @@
             parent="account.menu_finance_configuration"
             action="payment_notification_settings_action"
             sequence="100"/>
-        
+
     </data>
 </odoo>

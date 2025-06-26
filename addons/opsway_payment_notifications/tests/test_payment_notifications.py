@@ -199,7 +199,8 @@ class TestPaymentNotifications(TransactionCase):
         )
 
         with patch(
-            'odoo.addons.opsway_payment_notifications.models.account_move.AccountMove._send_payment_notification'
+            'odoo.addons.opsway_payment_notifications.models.'
+            'account_move.AccountMove._send_payment_notification'
         ) as mock_send:
             move = self.env['account.move'].create({
                 'journal_id': self.bank_journal.id,

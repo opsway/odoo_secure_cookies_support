@@ -10,7 +10,7 @@ class PaymentNotificationSettings(models.Model):
         ('all_payments', 'All Payments'),
         ('partner_specific', 'Partner Specific')
     ], string='Notification Type', required=True, default='all_payments')
-    
+
     # For all payments notifications
     all_payment_user_ids = fields.Many2many(
         'res.users',
@@ -19,7 +19,7 @@ class PaymentNotificationSettings(models.Model):
         'user_id',
         string='Users for All Payments'
     )
-    
+
     # For partner-specific notifications
     partner_specific_user_ids = fields.Many2many(
         'res.users',
@@ -35,16 +35,16 @@ class PaymentNotificationSettings(models.Model):
         'partner_id',
         string='Partners'
     )
-    
+
     active = fields.Boolean(string='Active', default=True)
-    company_id = fields.Many2one('res.company', string='Company', 
-                                default=lambda self: self.env.company)
+    company_id = fields.Many2one('res.company', string='Company',
+                                 default=lambda self: self.env.company)
 
     @api.model
     def get_notification_users(self, partner_id=None):
         """Get users who should receive notifications for a payment."""
         users = self.env['res.users']
-        
+
         # Get users for all payments
         all_payment_settings = self.search([
             ('notification_type', '=', 'all_payments'),
@@ -53,7 +53,7 @@ class PaymentNotificationSettings(models.Model):
         ])
         for setting in all_payment_settings:
             users |= setting.all_payment_user_ids
-        
+
         # Get users for partner-specific payments
         if partner_id:
             partner_settings = self.search([
@@ -64,5 +64,5 @@ class PaymentNotificationSettings(models.Model):
             ])
             for setting in partner_settings:
                 users |= setting.partner_specific_user_ids
-        
+
         return users
