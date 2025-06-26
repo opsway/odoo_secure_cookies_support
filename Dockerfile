@@ -61,8 +61,8 @@ RUN npm install -g rtlcss
 
 # Install Odoo
 ENV ODOO_VERSION 18.0
-ARG ODOO_RELEASE=20250428
-ARG ODOO_SHA=952a8f7148a7652809546ee7acdc2d66c09e04d9
+ARG ODOO_RELEASE=20250618
+ARG ODOO_SHA=890716bb151cf5e9abb4ae4f33e94705ae83db1b
 RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}.${ODOO_RELEASE}_all.deb \
     && echo "${ODOO_SHA} odoo.deb" | sha1sum -c - \
     && apt-get update \
@@ -75,14 +75,14 @@ COPY ./docker/entrypoint.sh /
 # Set permissions and Mount /var/lib/odoo to allow restoring filestore and /mnt/extra-addons for users addons
 RUN chown odoo /etc/odoo/odoo.conf \
     && mkdir -p /mnt/extra-addons \
-    && chown -R odoo /mnt/extra-addons
+    && chown -R odoo /mnt/extra-addons \
+    && mkdir -p /mnt/addons-third-party \
+    && chown -R odoo /mnt/addons-third-party
 RUN mkdir -p /mnt/submodules \
         && chown -R odoo /mnt/submodules
 RUN mkdir -p /mnt/enterprise \
         && chown -R odoo /mnt/enterprise
-RUN mkdir -p /mnt/opsway \
-        && chown -R odoo /mnt/opsway
-VOLUME ["/var/lib/odoo", "/mnt/extra-addons", "/mnt/submodules", "/mnt/opsway", "/mnt/enterprise"]
+VOLUME ["/var/lib/odoo", "/mnt/extra-addons", "/mnt/addons-third-party", "/mnt/submodules", "/mnt/enterprise"]
 
 COPY requirements.txt /opt/
 COPY requirements-dev.txt /opt/
@@ -96,6 +96,7 @@ EXPOSE 8069 8071 8072
 ENV ODOO_RC /etc/odoo/odoo.conf
 
 COPY ./docker/wait-for-psql.py /usr/local/bin/wait-for-psql.py
+RUN chmod +x entrypoint.sh /usr/local/bin/wait-for-psql.py
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["odoo"]

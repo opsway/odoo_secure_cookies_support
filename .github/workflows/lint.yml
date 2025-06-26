@@ -1,0 +1,31 @@
+name: Linter
+on:
+  pull_request:
+    branches:
+      - 'stage'
+      - 'Live'
+    types: ['closed','opened','synchronize']
+jobs:
+  odoo-lint:
+    name: Odoo lint
+    runs-on: ubuntu-latest
+    permissions: read-all
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get Python changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v37
+        with:
+          # Exclude third-party addons from linting to speed up CI
+          files_ignore: |
+            addons_third_party/**
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+      - name: Run pre-commit hooks on changed files
+        if: steps.changed-files.outputs.all_changed_files_count>0
+        run: |
+          pip install pre-commit
+          echo "Files changed: ${{steps.changed-files.outputs.all_changed_files}}"
+          pre-commit run --files ${{steps.changed-files.outputs.all_changed_files}}
