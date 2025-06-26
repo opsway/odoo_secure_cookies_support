@@ -25,7 +25,9 @@ repos:
       - id: check-xml
       - id: check-yaml
       - id: end-of-file-fixer
+        exclude: ^addons_third_party/
       - id: trailing-whitespace
+        exclude: ^addons_third_party/
   - repo: https://github.com/hhatto/autopep8
     rev: v2.1.0
     hooks:
