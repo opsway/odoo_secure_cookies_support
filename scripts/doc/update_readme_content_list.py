@@ -4,7 +4,7 @@ import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-STRUCTURE_DIR = os.path.join(ROOT, "doc")
+STRUCTURE_DIR = os.path.abspath(os.path.join(ROOT, "../doc"))
 README = os.path.abspath(os.path.join(ROOT, "../README.md"))
 START_MARK = "<!-- CONTENT_LIST_START -->"
 END_MARK = "<!-- CONTENT_LIST_END -->"
@@ -43,7 +43,7 @@ def build_content_list():
     for fname in sorted(os.listdir(STRUCTURE_DIR)):
         if not fname.endswith(".md"):
             continue
-        path = os.path.join("structure", fname)
+        path = os.path.join("doc", fname)
         title, desc = extract_title_and_description(
             os.path.join(STRUCTURE_DIR, fname))
         if not title:

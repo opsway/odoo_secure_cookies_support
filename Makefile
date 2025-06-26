@@ -13,3 +13,6 @@ add-checks:
 
 remove-checks:
 	pre-commit uninstall
+
+update-content-list:
+	python3 scripts/doc/update_readme_content_list.py
