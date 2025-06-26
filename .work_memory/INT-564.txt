@@ -1,0 +1,39 @@
+Payment notification system implementation completed:
+
+## Implementation Summary
+- Created new addon 'opsway_payment_notifications' for sending email notifications when payments are received on Bank or Cash journals
+- Module location: addons/opsway_payment_notifications/
+
+## Key Components:
+1. **Models**:
+   - payment.notification.settings: Configurable notification settings (all payments vs partner-specific)
+   - account.move (inherited): Added logic to detect payment entries and send notifications
+   - res.config.settings (inherited): Added global enable/disable setting
+
+2. **Trigger Logic**: 
+   - Journal entries with Bank/Cash type journals
+   - Journal items with debit > 0 on the bank account
+   - Excludes creator from notifications to avoid redundancy
+
+3. **Email Template**: 
+   - Dynamic subject/body based on partner presence
+   - Uses Odoo's mail template system with proper Mako syntax
+
+4. **Configuration**:
+   - Global setting in Accounting settings
+   - Separate menu for detailed notification settings
+   - Two notification types: all payments and partner-specific
+
+## Technical Notes:
+- Used 'list' instead of 'tree' for Odoo 18 compatibility in view definitions
+- Added to custom_modules_init dependency list
+- Tests use unique tag 'payment_notifications_test_ai_564' for filtering
+- All 8 tests passing successfully
+
+## Requirements Coverage:
+✅ Triggers on Bank/Cash journal entries with debit
+✅ Configurable user notifications (all payments + partner specific)
+✅ Email notifications with proper subject/body formatting
+✅ Excludes creator from notifications
+✅ Works with demo data (tests confirm functionality)
+✅ Compatible with both Invoicing and Accounting apps
