@@ -52,7 +52,7 @@ jobs:
         run: |
           mv addons/* /mnt/extra-addons 
           if [ "$(ls submodules)" ]; then mv submodules/* /mnt/submodules; fi
-          if [ "$(ls addons_third_party)" ]; then mv addons_third_party/* /mnt/extra-addons-third-party; fi 
+          if [ "$(ls addons_third_party)" ]; then mv addons_third_party/* /mnt/addons-third-party; fi 
           mv env/common/test-odoo.conf $HOME/odoo.conf
       - name: Run unit tests
         env:
