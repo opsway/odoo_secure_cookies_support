@@ -2,8 +2,8 @@ name: Tests
 on:
   pull_request:
     branches:
-      - 'master'
-      - 'live'
+      - 'stage'
+      - 'Live'
     types: [ 'closed','opened','synchronize' ]
 jobs:
   odoo-tests:
