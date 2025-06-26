@@ -1,0 +1,4 @@
+[submodule "submodules/odoo_secure_cookies_support"]
+	path = submodules/odoo_secure_cookies_support
+	url = git@github.com:opsway/odoo_secure_cookies_support.git
+	branch = 18.0
