@@ -11,6 +11,7 @@ services:
       - "8010:8069"
     volumes:
       - ../../addons:/mnt/extra-addons
+      - ../../addons-third-party:/mnt/addons-third-party
       - ../../submodules:/mnt/submodules
       - ../../enterprise:/mnt/enterprise
       - ./odoo.conf:/etc/odoo/odoo.conf
