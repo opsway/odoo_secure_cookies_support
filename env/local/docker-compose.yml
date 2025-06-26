@@ -1,8 +1,8 @@
 version: '2'
 services:
-  web:
+  opsway-web:
     container_name: opsway-web
-    image: lumirang_odoo_local_opsway
+    image: quay.io/opsway/odoo:opsway
     build: ../..
     user: odoo
     depends_on:

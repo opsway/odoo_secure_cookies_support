@@ -1,0 +1,26 @@
+name: Check Documentation Structure
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  check-doc-structure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Compare doc structure
+        if: secrets.GH_PAT != ''
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: python scripts/doc/compare_doc_structure.py

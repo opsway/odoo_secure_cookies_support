@@ -1,0 +1,3 @@
+pylint==2.15.*
+pylint-odoo==8.0.19
+pre-commit==3.3.3
