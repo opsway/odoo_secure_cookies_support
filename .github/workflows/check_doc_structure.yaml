@@ -20,7 +20,9 @@ jobs:
         run: pip install requests
 
       - name: Compare doc structure
-        if: secrets.GH_PAT != ''
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
-        run: python scripts/doc/compare_doc_structure.py
+        run: |
+          if [[ $GH_PAT != '' ]]; then
+            python scripts/doc/compare_doc_structure.py
+          fi;
