@@ -65,3 +65,31 @@ QA Code Review Fixes Completed (2025-06-26):
 - All linting issues identified in PR #58 comments have been resolved
 - Files now comply with project's pre-commit hooks standards
 - Import order follows Python conventions (stdlib, then odoo, then third-party)
+Fixed INT-564 issues for opsway_payment_notifications addon:
+
+ISSUES IDENTIFIED AND FIXED:
+1. Email notification error - MailTemplate.send_mail() got unexpected keyword argument 'email_to'
+   - Fixed by using mail template _generate_template method and creating mail manually
+   - Located in addons/opsway_payment_notifications/models/account_move.py line 95-123
+
+2. Updated setting caption in Payment Notifications Settings
+   - Changed from "Payment Notifications" to "Send notifications following the Payment Notifications Settings once money is received in Bank or Cash account"
+   - Located in addons/opsway_payment_notifications/views/res_config_settings_views.xml line 13
+
+3. Changed field name from "Users for Partner Payments" to "Users to notify"
+   - Updated in addons/opsway_payment_notifications/models/payment_notification_settings.py line 29
+
+4. Added domain restriction for Internal Users in user selection fields
+   - Added domain=[('share', '=', False)] to both all_payment_user_ids and partner_specific_user_ids
+   - Located in addons/opsway_payment_notifications/models/payment_notification_settings.py lines 21 and 31
+
+ADDON STRUCTURE:
+- Main logic in models/account_move.py - overrides action_post() to send notifications on Bank/Cash journal entries
+- Configuration settings in models/res_config_settings.py and models/payment_notification_settings.py
+- Email template in data/mail_template_data.xml
+- Views in views/ directory
+- Comprehensive tests in tests/test_payment_notifications.py with tag 'payment_notifications_test_ai_564'
+
+TESTING:
+- Tests exist and cover functionality but there were some issues running them due to module dependencies
+- Tests include checking notification triggers, user retrieval, and email sending logic
