@@ -10,7 +10,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//app[@name='account']" position="inside">
                     <block title="Payment Notifications" id="payment_notifications_block">
-                        <setting string="Payment Notifications" help="Send email notifications when payments are received on Bank or Cash accounts">
+                        <setting string="Send notifications following the Payment Notifications Settings once money is received in Bank or Cash account" help="Send email notifications when payments are received on Bank or Cash accounts">
                             <field name="payment_notification_enabled"/>
                         </setting>
                     </block>

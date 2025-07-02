@@ -94,15 +94,21 @@ class AccountMove(models.Model):
 
             for user in users_to_notify:
                 if user.partner_id.email:
-                    mail_template.with_context(
+                    # Generate email content
+                    mail_values = mail_template.with_context(
                         **template_values,
                         recipient_name=user.name
-                    ).send_mail(
-                        self.id,
-                        force_send=True,
-                        email_to=user.partner_id.email,
-                        notif_layout='mail.mail_notification_light'
-                    )
+                    )._generate_template(self.id)
+
+                    # Create and send mail
+                    mail = self.env['mail.mail'].create({
+                        'subject': mail_values['subject'],
+                        'body_html': mail_values['body_html'],
+                        'email_to': user.partner_id.email,
+                        'email_from': self.env.user.email or self.env.company.email,
+                        'auto_delete': True,
+                    })
+                    mail.send()
 
             _logger.info(
                 f"Payment notification sent for move {
