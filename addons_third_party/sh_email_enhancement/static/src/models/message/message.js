@@ -1,28 +1,37 @@
 /** @odoo-module **/
+import { patch } from "@web/core/utils/patch";
+import { Message } from "@mail/core/common/message";
+import { useService } from "@web/core/utils/hooks";
+import { useState } from "@odoo/owl";
 
-import { registerPatch } from '@mail/model/model_core';
-import { attr } from '@mail/model/model_field';
+patch(Message.prototype, {
+    setup() {
+        super.setup();
 
-registerPatch({
-    name: 'Message',
-    modelMethods: {
-        /**
-         * @override
-         */
-        convertData(data) {
-        	 const res = this._super(data);
-             if ('cc_email' in data) {
-                 res.cc_email = data.cc_email;
-             }
-             if ('bcc_email' in data) {
-                 res.bcc_email = data.bcc_email;
-             }
-             return res;
-        },
+        this.orm = useService("orm");
+
+        // Use useState for reactive state
+        this.emailState = useState({
+            cc_email: '',
+            bcc_email: '',
+        });
+
+        this._fetchCCandBCC();
     },
-    fields: {
-    	cc_email: attr(),
-        bcc_email: attr(),
 
+    async _fetchCCandBCC() {
+        try {
+            const result = await this.orm.read("mail.message", [this.message.id], ["cc_email", "bcc_email"]);
+            if (result && result.length) {
+                const mailRecord = result[0];
+
+                this.emailState.cc_email = mailRecord.cc_email || '';
+                this.emailState.bcc_email = mailRecord.bcc_email || '';
+            } else {
+                console.warn("No mail.message record found for given ID.");
+            }
+        } catch (error) {
+            console.error("Failed to fetch mail.message record:", error);
+        }
     },
 });
