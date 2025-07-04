@@ -192,11 +192,10 @@ class TestPaymentNotifications(TransactionCase):
         mock_send.assert_called_once()
 
     def test_notification_disabled_no_trigger(self):
-        """Test that notifications are not sent when disabled."""
-        # Disable notifications
-        self.env['ir.config_parameter'].sudo().set_param(
-            'opsway_payment_notifications.enabled', False
-        )
+        """Test that notifications are not sent when no active settings exist."""
+        # Disable all notification settings
+        self.env['payment.notification.settings'].search(
+            []).write({'active': False})
 
         with patch(
             'odoo.addons.opsway_payment_notifications.models.'
@@ -220,6 +219,5 @@ class TestPaymentNotifications(TransactionCase):
             mock_send.assert_not_called()
 
         # Re-enable for other tests
-        self.env['ir.config_parameter'].sudo().set_param(
-            'opsway_payment_notifications.enabled', True
-        )
+        self.env['payment.notification.settings'].search(
+            []).write({'active': True})

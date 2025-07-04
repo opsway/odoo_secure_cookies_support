@@ -12,10 +12,13 @@ class AccountMove(models.Model):
         """Override to send payment notifications after posting."""
         result = super().action_post()
 
-        # Check if notifications are enabled
-        if not self.env['ir.config_parameter'].sudo().get_param(
-            'opsway_payment_notifications.enabled', False
-        ):
+        # Check if there are active notification settings
+        notification_settings = self.env['payment.notification.settings'].search([
+            ('active', '=', True),
+            ('company_id', '=', self.env.company.id)
+        ])
+
+        if not notification_settings:
             return result
 
         for move in self:
@@ -100,7 +103,7 @@ class AccountMove(models.Model):
                     ).send_mail(
                         self.id,
                         force_send=True,
-                        email_to=user.partner_id.email,
+                        email_values={'email_to': user.partner_id.email},
                         notif_layout='mail.mail_notification_light'
                     )
 

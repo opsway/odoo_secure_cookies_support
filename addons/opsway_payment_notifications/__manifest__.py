@@ -15,7 +15,6 @@
     'data': [
         'security/ir.model.access.csv',
         'data/mail_template_data.xml',
-        'views/res_config_settings_views.xml',
         'views/payment_notification_settings_views.xml',
     ],
     'license': 'Other proprietary',
