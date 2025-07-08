@@ -27,7 +27,7 @@ class PaymentNotificationSettings(models.Model):
         'payment_notification_partner_users_rel',
         'setting_id',
         'user_id',
-        string='Users to notify for partner payments',
+        string='Users to notify',
         domain=[('share', '=', False)]
     )
     partner_ids = fields.Many2many(

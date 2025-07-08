@@ -1,7 +1,9 @@
+import inspect
 from unittest.mock import patch
 
 from odoo.tests.common import TransactionCase
 from odoo.tests import tagged
+from odoo.addons.opsway_payment_notifications.models.account_move import AccountMove
 
 
 @tagged('post_install', '-at_install', 'payment_notifications_test_ai_564', 'all_run')
@@ -221,3 +223,12 @@ class TestPaymentNotifications(TransactionCase):
         # Re-enable for other tests
         self.env['payment.notification.settings'].search(
             []).write({'active': True})
+
+    def test_email_layout_parameter_correct(self):
+        """Test that the fixed code doesn't contain the old notif_layout parameter."""
+        # Check the source code doesn't contain the problematic parameter
+        source = inspect.getsource(AccountMove._send_payment_notification)
+
+        # Verify the fix: email_layout_xmlid should be present, notif_layout should not
+        self.assertIn('email_layout_xmlid', source)
+        self.assertNotIn('notif_layout', source)

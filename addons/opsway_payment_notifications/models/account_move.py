@@ -104,7 +104,7 @@ class AccountMove(models.Model):
                         self.id,
                         force_send=True,
                         email_values={'email_to': user.partner_id.email},
-                        notif_layout='mail.mail_notification_light'
+                        email_layout_xmlid='mail.mail_notification_light'
                     )
 
             _logger.info(
