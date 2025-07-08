@@ -1,9 +1,7 @@
-import inspect
 from unittest.mock import patch
 
 from odoo.tests.common import TransactionCase
 from odoo.tests import tagged
-from odoo.addons.opsway_payment_notifications.models.account_move import AccountMove
 
 
 @tagged('post_install', '-at_install', 'payment_notifications_test_ai_564', 'all_run')
@@ -224,11 +222,38 @@ class TestPaymentNotifications(TransactionCase):
         self.env['payment.notification.settings'].search(
             []).write({'active': True})
 
-    def test_email_layout_parameter_correct(self):
-        """Test that the fixed code doesn't contain the old notif_layout parameter."""
-        # Check the source code doesn't contain the problematic parameter
-        source = inspect.getsource(AccountMove._send_payment_notification)
+    @patch('odoo.addons.mail.models.mail_template.MailTemplate.send_mail')
+    def test_send_payment_notification_sends_emails(self, mock_send_mail):
+        """Test that _send_payment_notification sends emails using proper mail template method."""
+        # Create test move
+        move = self.env['account.move'].create({
+            'journal_id': self.bank_journal.id,
+            'line_ids': [
+                (0, 0, {
+                    'account_id': self.bank_account.id,
+                    'debit': 1000.0,
+                    'partner_id': self.test_partner.id,
+                }),
+                (0, 0, {
+                    'account_id': self.income_account.id,
+                    'credit': 1000.0,
+                }),
+            ],
+        })
 
-        # Verify the fix: email_layout_xmlid should be present, notif_layout should not
-        self.assertIn('email_layout_xmlid', source)
-        self.assertNotIn('notif_layout', source)
+        # Call the method
+        move._send_payment_notification()
+
+        # Verify send_mail was called with correct parameters
+        self.assertTrue(mock_send_mail.called)
+        call_args = mock_send_mail.call_args
+
+        # Check that email_layout_xmlid is not in the call arguments
+        self.assertNotIn('email_layout_xmlid', call_args[1])
+        # Check that notif_layout is not in the call arguments
+        self.assertNotIn('notif_layout', call_args[1])
+        # Check that force_send is True
+        self.assertEqual(call_args[1]['force_send'], True)
+        # Check that email_values contains email_to
+        self.assertIn('email_values', call_args[1])
+        self.assertIn('email_to', call_args[1]['email_values'])
