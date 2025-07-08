@@ -6,7 +6,7 @@ This guide defines differences from the standard git workflow and describes the 
 
 ## Full Description of the approach
 
-See the Standard Workflow in https://github.com/opsway/odoo_sop/tree/main/doc/git_flow.md
+See the Standard Workflow in general/git_flow.md
 
 ## Differences with Standard approach
 

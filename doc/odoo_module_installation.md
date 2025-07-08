@@ -6,7 +6,7 @@ This guide defines differences with standard procedures of adding new Odoo modul
 
 ## Full Description of the approach
 
-See description of the Standard approach in https://github.com/opsway/odoo_sop/blob/main/doc/odoo_module_installation.md
+See description of the Standard approach in general/odoo_module_installation.md
 
 ## Differences with Standard approach
 

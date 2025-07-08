@@ -6,7 +6,7 @@ This guide defines differences from the standardized repository structure to ens
 
 ## Full Description of the custom approach
 
-See description of the Standard approach in https://github.com/opsway/odoo_sop/blob/main/doc/repository.md
+See description of the Standard approach in general/repository.md
 
 ## Differences with Standard approach
 
