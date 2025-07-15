@@ -36,7 +36,7 @@ jobs:
           ODOO_BRANCH: ${{vars.ODOO_BRANCH}}
         shell: bash
         run: |
-          git config --global --add safe.directory /__w/__REPO_NAME__/__REPO_NAME__
+          git config --global --add safe.directory /__w/internal/internal
           git config --global --add safe.directory /mnt/enterprise
           mkdir -p /mnt/enterprise
           chown -R odoo /mnt/enterprise
