@@ -17,9 +17,9 @@
         'currency_name_res_partner_bank',
         'sh_email_enhancement',
         'sh_email_enhancement_extension',
-        'one2many_duplicate_lines',
-        # 'odoo_secure_cookies_support',  # TODO: make sure that this module will be available in CI and AI flow,
-        #  then uncomment
+        'web_one2many_duplicate_cr',
+        'account_reports_exclude_analytics',
+        'odoo_secure_cookies_support',
     ],
     'data': [],
     'installable': True,

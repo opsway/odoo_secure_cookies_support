@@ -36,7 +36,7 @@ jobs:
           ODOO_BRANCH: ${{vars.ODOO_BRANCH}}
         shell: bash
         run: |
-          git config --global --add safe.directory /__w/__REPO_NAME__/__REPO_NAME__
+          git config --global --add safe.directory /__w/internal/internal
           git config --global --add safe.directory /mnt/enterprise
           mkdir -p /mnt/enterprise
           chown -R odoo /mnt/enterprise
@@ -44,6 +44,8 @@ jobs:
           echo "$ODOO_ENTERPRISE_SECRET" > $HOME/.ssh/id_rsa
           chmod 600 $HOME/.ssh/id_rsa
           export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa"
+          git submodule sync --recursive
+          git submodule update --init --recursive
           git clone --branch $ODOO_BRANCH --depth=1 git@github.com:odoo/enterprise.git /mnt/enterprise
           cd /mnt/enterprise
           git fetch origin $ENTERPRISE_REVISION

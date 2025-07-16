@@ -16,3 +16,14 @@ __pycache__/
 # PyCharm
 .idea/
 enterprise/
+
+# everything that AI uses in wrokflows
+ai_tooling/
+odoo_sop/
+prompt.txt
+prompt_file_vars.yml
+prompt_vars.yml
+core/
+installed_modules/
+doc/general/
+READMO_content_list.md

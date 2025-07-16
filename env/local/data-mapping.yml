@@ -1,0 +1,4 @@
+services:
+  opsway-web:
+    volumes:
+      - ./data:/var/lib/odoo
