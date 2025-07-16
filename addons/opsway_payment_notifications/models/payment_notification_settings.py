@@ -17,7 +17,7 @@ class PaymentNotificationSettings(models.Model):
         'payment_notification_all_users_rel',
         'setting_id',
         'user_id',
-        string='Users to notify for all payments',
+        string='Users for All Payments',
         domain=[('share', '=', False)]
     )
 
