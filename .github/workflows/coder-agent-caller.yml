@@ -29,7 +29,7 @@ run-name: Trigger Coder Agent for ${{ inputs.jira_id }}
 
 jobs:
   coder-agent:
-    uses: opsway/ai_tooling/.github/workflows/coder-agent.yml@${{ github.event.client_payload.is_test && 'dev' || 'master' }}}
+    uses: opsway/ai_tooling/.github/workflows/coder-agent.yml@${{ github.event.client_payload.is_test == 'true' && 'dev' || 'master' }}
     with:
       jira_id:  ${{ inputs.jira_id || github.event.client_payload.jira_id }}
       spent:   ${{ inputs.spent || github.event.client_payload.spent }}
