@@ -7,6 +7,9 @@ class AccountAnalyticReport(models.AbstractModel):
 
     # pylint: disable=no-else-return
     def action_audit_cell(self, options, params):
+        """
+            Copy of the action_audit_cell from the account_reports module.
+        """
         column_group_options = self._get_column_group_options(
             options, params['column_group_key'])
 
