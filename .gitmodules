@@ -2,3 +2,7 @@
 	path = submodules/odoo_secure_cookies_support
 	url = git@github.com:opsway/odoo_secure_cookies_support.git
 	branch = 18.0
+[submodule "submodules/one2many_duplicate_lines"]
+	path = submodules/one2many_duplicate_lines
+	url = git@github.com:opsway/one2many_duplicate_lines.git
+	branch = 18.0
