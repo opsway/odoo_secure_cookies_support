@@ -17,7 +17,7 @@
         'currency_name_res_partner_bank',
         'sh_email_enhancement',
         'sh_email_enhancement_extension',
-        'web_one2many_duplicate_cr',
+        'one2many_duplicate_lines',
         'account_reports_exclude_analytics',
         'odoo_secure_cookies_support',
     ],
