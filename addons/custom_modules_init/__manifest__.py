@@ -18,6 +18,7 @@
         'sh_email_enhancement',
         'sh_email_enhancement_extension',
         'web_one2many_duplicate_cr',
+        'account_reports_exclude_analytics',
         # 'odoo_secure_cookies_support',  # TODO: make sure that this module will be available in CI and AI flow,
         #  then uncomment
     ],
