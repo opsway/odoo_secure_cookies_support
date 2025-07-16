@@ -9,7 +9,7 @@ run-name: Code review response for ${{ inputs.jira_id }}
 jobs:
   code-review-response:
     if: github.event.review.state == 'changes_requested' && github.event.pull_request.user.login == vars.AI_PR_AUTHOR
-    uses: opsway/ai_tooling/.github/workflows/coder-agent.yml@master
+    uses: opsway/ai_tooling/.github/workflows/coder-agent.yml@${{ contains(github.event.pull_request.labels.*.name, 'test_ai') && 'dev' || 'master' }}
     with:
       jira_id: ''
       spent: '0'

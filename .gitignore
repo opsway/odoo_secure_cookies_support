@@ -18,12 +18,12 @@ __pycache__/
 enterprise/
 
 # everything that AI uses in wrokflows
-ai_tooling
-odoo_sop
+ai_tooling/
+odoo_sop/
 prompt.txt
 prompt_file_vars.yml
 prompt_vars.yml
-core
-installed_modules
-doc/general
+core/
+installed_modules/
+doc/general/
 READMO_content_list.md
