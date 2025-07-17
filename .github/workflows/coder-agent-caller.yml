@@ -28,10 +28,23 @@ on:
 run-name: Trigger Coder Agent for ${{ inputs.jira_id }}
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      branch: ${{ steps.set_branch.outputs.branch_name }}
+    steps:
+      - name: Set branch name
+        id: set_branch
+        run: |
+          if [ "${{ github.event.client_payload.is_test }}" == "true" ]; then
+            echo "branch_name=dev" >> $GITHUB_OUTPUT
+          else
+            echo "branch_name=master" >> $GITHUB_OUTPUT
+          fi
+
   coder-agent:
-    env:
-      BRANCH: ${{ (github.event.client_payload.is_test == 'true' && 'dev') || 'master' }}
-    uses: opsway/ai_tooling/.github/workflows/coder-agent.yml@${{ env.BRANCH }}
+    needs: prepare
+    uses: opsway/ai_tooling/.github/workflows/coder-agent.yml@${{ needs.prepare.outputs.branch }}
     with:
       jira_id:  ${{ inputs.jira_id || github.event.client_payload.jira_id }}
       spent:   ${{ inputs.spent || github.event.client_payload.spent }}

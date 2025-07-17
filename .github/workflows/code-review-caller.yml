@@ -7,11 +7,25 @@ on:
 run-name: Code review response for ${{ inputs.jira_id }}
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      branch: ${{ steps.set_branch.outputs.branch_name }}
+    steps:
+      - name: Set branch name
+        id: set_branch
+        run: |
+          if ${{ contains(github.event.pull_request.labels.*.name, 'test_ai') }};
+          then
+            echo "branch_name=dev" >> $GITHUB_OUTPUT
+          else
+            echo "branch_name=master" >> $GITHUB_OUTPUT
+          fi
+
   code-review-response:
+    needs: prepare
     if: github.event.review.state == 'changes_requested' && github.event.pull_request.user.login == vars.AI_PR_AUTHOR
-    env:
-      BRANCH: ${{ (contains(github.event.pull_request.labels.*.name, 'test_ai') && 'dev') || 'master' }}
-    uses: opsway/ai_tooling/.github/workflows/coder-agent.yml@${{ env.BRANCH }}
+    uses: opsway/ai_tooling/.github/workflows/coder-agent.yml@${{ needs.prepare.outputs.branch }}
     with:
       jira_id: ''
       spent: '0'
