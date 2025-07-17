@@ -15,7 +15,6 @@ jobs:
       spent: '0'
       budget: '2'
       qa_note: 'See comments added to the pull request #${{ github.event.pull_request.number }}'
-      pr_url: ${{ github.event.pull_request.html_url }}
       stage_branch: ${{ vars.STAGE_BRANCH }}
       starting_branch: ${{ github.event.pull_request.head.ref  }}
       feature_branch: ${{ github.event.pull_request.head.ref }}
@@ -36,7 +35,7 @@ jobs:
       QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
 
   code-review-response-master:
-    if: !contains(github.event.pull_request.labels.*.name, 'test_ai') && github.event.review.state == 'changes_requested' && github.event.pull_request.user.login == vars.AI_PR_AUTHOR
+    if: "!contains(github.event.pull_request.labels.*.name, 'test_ai') && github.event.review.state == 'changes_requested' && github.event.pull_request.user.login == vars.AI_PR_AUTHOR"
     uses: opsway/ai_tooling/.github/workflows/coder-agent.yml@master
     with:
       jira_id: ''
