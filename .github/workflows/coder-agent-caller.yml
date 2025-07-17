@@ -30,7 +30,6 @@ run-name: Trigger Coder Agent for ${{ inputs.jira_id }}
 jobs:
   coder-agent-dev:
     if: github.event.client_payload.is_test == 'true'
-    runs-on: ubuntu-latest
     uses: opsway/ai_tooling/.github/workflows/coder-agent.yml@dev
     with:
       jira_id:  ${{ inputs.jira_id || github.event.client_payload.jira_id }}
@@ -58,7 +57,6 @@ jobs:
 
   coder-agent-master:
     if: github.event.client_payload.is_test != 'true'
-    runs-on: ubuntu-latest
     uses: opsway/ai_tooling/.github/workflows/coder-agent.yml@master
     with:
       jira_id:  ${{ inputs.jira_id || github.event.client_payload.jira_id }}
