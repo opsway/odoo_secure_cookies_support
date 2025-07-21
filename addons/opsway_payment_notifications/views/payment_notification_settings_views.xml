@@ -10,11 +10,11 @@
                 <search>
                     <field name="name"/>
                     <field name="notification_type"/>
-                    <filter name="active" string="Active" domain="[('active', '=', True)]"/>
-                    <filter name="inactive" string="Inactive" domain="[('active', '=', False)]"/>
+                    <filter name="active_filter" string="Active" domain="[('active', '=', True)]"/>
+                    <filter name="inactive_filter" string="Inactive" domain="[('active', '=', False)]"/>
                     <group string="Group By">
                         <filter name="group_by_type" string="Notification Type" context="{'group_by': 'notification_type'}"/>
-                        <filter name="group_by_active" string="Active" context="{'group_by': 'active'}"/>
+                        <filter name="group_by_state" string="Record State" context="{'group_by': 'active'}"/>
                     </group>
                 </search>
             </field>
@@ -93,7 +93,7 @@
             <field name="res_model">payment.notification.settings</field>
             <field name="view_mode">list,form</field>
             <field name="domain">[]</field>
-            <field name="context">{'search_default_active': 0}</field>
+            <field name="context">{}</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     Create payment notification settings
