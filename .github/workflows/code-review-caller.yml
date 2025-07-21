@@ -26,6 +26,7 @@ jobs:
       ODOO_SERVICE_NAME: ${{ vars.ODOO_SERVICE_NAME }}
       DATABASE_SERVICE_NAME: ${{ vars.DATABASE_SERVICE_NAME }}
       odoo_branch: ${{ vars.ODOO_BRANCH }}
+      ai_tooling_branch: 'dev'
     secrets:
       JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
       ODOO_ENTERPRISE_SECRET: ${{ secrets.ODOO_ENTERPRISE_SECRET }}
@@ -53,6 +54,7 @@ jobs:
       ODOO_SERVICE_NAME: ${{ vars.ODOO_SERVICE_NAME }}
       DATABASE_SERVICE_NAME: ${{ vars.DATABASE_SERVICE_NAME }}
       odoo_branch: ${{ vars.ODOO_BRANCH }}
+      ai_tooling_branch: 'master'
     secrets:
       JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
       ODOO_ENTERPRISE_SECRET: ${{ secrets.ODOO_ENTERPRISE_SECRET }}
