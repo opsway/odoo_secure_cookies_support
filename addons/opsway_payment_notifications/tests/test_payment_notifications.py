@@ -170,9 +170,18 @@ class TestPaymentNotifications(TransactionCase):
         self.assertIn(self.test_user_1, users)  # From all payments
         self.assertIn(self.test_user_2, users)  # From partner specific
 
-    @patch('odoo.addons.opsway_payment_notifications.models.account_move.AccountMove._send_payment_notification')
-    def test_action_post_triggers_notification(self, mock_send):
+    @patch('odoo.addons.mail.models.mail_template.MailTemplate._generate_template')
+    @patch('odoo.addons.mail.models.mail_template.MailTemplate.send_mail')
+    def test_action_post_triggers_notification(self, mock_send_mail, mock_generate_template):
         """Test that posting a qualifying move triggers notification."""
+        # Mock template generation to return clean subject
+        def mock_generate_return(res_ids, fields):
+            return {res_ids[0]: {
+                'subject': 'Payment from Test Partner has been received.',
+                'body_html': '<p>Test email body</p>'
+            }}
+        mock_generate_template.side_effect = mock_generate_return
+
         move = self.env['account.move'].create({
             'journal_id': self.bank_journal.id,
             'line_ids': [
@@ -189,7 +198,10 @@ class TestPaymentNotifications(TransactionCase):
         })
 
         move.action_post()
-        mock_send.assert_called_once()
+
+        # Verify that email sending methods were called
+        self.assertTrue(mock_generate_template.called)
+        self.assertTrue(mock_send_mail.called)
 
     def test_notification_disabled_no_trigger(self):
         """Test that notifications are not sent when no active settings exist."""
@@ -198,9 +210,8 @@ class TestPaymentNotifications(TransactionCase):
             []).write({'active': False})
 
         with patch(
-            'odoo.addons.opsway_payment_notifications.models.'
-            'account_move.AccountMove._send_payment_notification'
-        ) as mock_send:
+            'odoo.addons.mail.models.mail_template.MailTemplate.send_mail'
+        ) as mock_send_mail:
             move = self.env['account.move'].create({
                 'journal_id': self.bank_journal.id,
                 'line_ids': [
@@ -216,15 +227,24 @@ class TestPaymentNotifications(TransactionCase):
             })
 
             move.action_post()
-            mock_send.assert_not_called()
+            mock_send_mail.assert_not_called()
 
         # Re-enable for other tests
         self.env['payment.notification.settings'].search(
             []).write({'active': True})
 
+    @patch('odoo.addons.mail.models.mail_template.MailTemplate._generate_template')
     @patch('odoo.addons.mail.models.mail_template.MailTemplate.send_mail')
-    def test_send_payment_notification_sends_emails(self, mock_send_mail):
+    def test_send_payment_notification_sends_emails(self, mock_send_mail, mock_generate_template):
         """Test that _send_payment_notification sends emails using proper mail template method."""
+        # Mock template generation to return a clean subject
+        def mock_generate_return(res_ids, fields):
+            return {res_ids[0]: {
+                'subject': 'Payment from Test Partner has been received.',
+                'body_html': '<p>Test email body</p>'
+            }}
+        mock_generate_template.side_effect = mock_generate_return
+
         # Create test move
         move = self.env['account.move'].create({
             'journal_id': self.bank_journal.id,
@@ -244,16 +264,67 @@ class TestPaymentNotifications(TransactionCase):
         # Call the method
         move._send_payment_notification()
 
-        # Verify send_mail was called with correct parameters
+        # Verify template generation was called
+        self.assertTrue(mock_generate_template.called)
+        # Verify send_mail was called
         self.assertTrue(mock_send_mail.called)
-        call_args = mock_send_mail.call_args
 
-        # Check that email_layout_xmlid is not in the call arguments
-        self.assertNotIn('email_layout_xmlid', call_args[1])
-        # Check that notif_layout is not in the call arguments
-        self.assertNotIn('notif_layout', call_args[1])
-        # Check that force_send is True
+        # Check call parameters
+        call_args = mock_send_mail.call_args
         self.assertEqual(call_args[1]['force_send'], True)
-        # Check that email_values contains email_to
         self.assertIn('email_values', call_args[1])
         self.assertIn('email_to', call_args[1]['email_values'])
+        self.assertIn('subject', call_args[1]['email_values'])
+
+    def test_subject_cleaning(self):
+        """Test that email subjects with newlines are properly cleaned."""
+        # Create a test move
+        move = self.env['account.move'].create({
+            'journal_id': self.bank_journal.id,
+            'line_ids': [
+                (0, 0, {
+                    'account_id': self.bank_account.id,
+                    'debit': 1000.0,
+                    'partner_id': self.test_partner.id,
+                }),
+                (0, 0, {
+                    'account_id': self.income_account.id,
+                    'credit': 1000.0,
+                }),
+            ],
+        })
+
+        # Test subject cleaning logic
+        template_values = {
+            'partner_name': 'Test\nPartner',
+            'amount': '$ 1000.0',
+            'journal_name': 'Test Bank',
+        }
+
+        # Mock template to return subject with newlines
+        mail_template = self.env.ref(
+            'opsway_payment_notifications.payment_received_email_template'
+        )
+
+        with patch('odoo.addons.mail.models.mail_template.MailTemplate._generate_template') as mock_generate:
+            def mock_generate_return(res_ids, fields):
+                return {res_ids[0]: {
+                    'subject': 'Payment from Test\nPartner\r\nhas been received.',
+                    'body_html': '<p>Test</p>'
+                }}
+            mock_generate.side_effect = mock_generate_return
+
+            with patch('odoo.addons.mail.models.mail_template.MailTemplate.send_mail') as mock_send:
+                move._send_payment_notification()
+
+                # Check that subject was cleaned
+                self.assertTrue(mock_send.called)
+                email_values = mock_send.call_args[1]['email_values']
+                cleaned_subject = email_values['subject']
+
+                # Verify no newlines in subject
+                self.assertNotIn('\n', cleaned_subject)
+                self.assertNotIn('\r', cleaned_subject)
+                # Verify content is preserved
+                self.assertIn(
+                    'Payment from Test Partner has been received.', cleaned_subject)

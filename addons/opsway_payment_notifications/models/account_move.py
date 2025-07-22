@@ -97,13 +97,28 @@ class AccountMove(models.Model):
 
             for user in users_to_notify:
                 if user.partner_id.email:
-                    mail_template.with_context(
+                    # Generate template with render_fields to get subject and body
+                    template_data = mail_template.with_context(
                         **template_values,
                         recipient_name=user.name
-                    ).send_mail(
+                    )._generate_template([self.id], ['subject', 'body_html'])
+
+                    # Clean subject to remove newlines and carriage returns
+                    subject = template_data.get(self.id, {}).get('subject', '')
+                    if subject:
+                        subject = subject.replace(
+                            '\n', ' ').replace('\r', ' ').strip()
+                        # Remove excessive whitespace
+                        subject = ' '.join(subject.split())
+
+                    # Send email with cleaned subject
+                    mail_template.send_mail(
                         self.id,
                         force_send=True,
-                        email_values={'email_to': user.partner_id.email}
+                        email_values={
+                            'email_to': user.partner_id.email,
+                            'subject': subject
+                        }
                     )
 
             _logger.info(
