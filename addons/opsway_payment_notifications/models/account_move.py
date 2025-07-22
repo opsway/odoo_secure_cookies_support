@@ -97,26 +97,14 @@ class AccountMove(models.Model):
 
             for user in users_to_notify:
                 if user.partner_id.email:
-                    # Generate email content
-                    template_results = mail_template.with_context(
+                    mail_template.with_context(
                         **template_values,
                         recipient_name=user.name
-                    )._generate_template([self.id], ['subject', 'body_html'])
-
-                    mail_values = template_results[self.id]
-
-                    # Create and send mail
-                    # Clean subject to remove any newline or carriage return characters
-                    clean_subject = mail_values['subject'].replace(
-                        '\n', ' ').replace('\r', ' ').strip()
-                    mail = self.env['mail.mail'].create({
-                        'subject': clean_subject,
-                        'body_html': mail_values['body_html'],
-                        'email_to': user.partner_id.email,
-                        'email_from': self.env.user.email or self.env.company.email,
-                        'auto_delete': True,
-                    })
-                    mail.send()
+                    ).send_mail(
+                        self.id,
+                        force_send=True,
+                        email_values={'email_to': user.partner_id.email}
+                    )
 
             _logger.info(
                 f"Payment notification sent for move {
