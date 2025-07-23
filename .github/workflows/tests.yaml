@@ -61,4 +61,4 @@ jobs:
           INIT_ADDONS: ${{vars.INITIAL_ODOO_ADDONS}}
         run: |
           MODULES=$(for d in /mnt/extra-addons/*/tests; do echo "/$(basename $(dirname $d))"; done | paste -sd ',' -)
-          python3 -u /usr/bin/odoo --conf $HOME/odoo.conf -i $INIT_ADDONS --test-tags=MODULES
+          python3 -u /usr/bin/odoo --conf $HOME/odoo.conf -i $INIT_ADDONS --test-tags=$MODULES
