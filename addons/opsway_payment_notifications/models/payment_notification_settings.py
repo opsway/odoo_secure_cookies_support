@@ -43,6 +43,33 @@ class PaymentNotificationSettings(models.Model):
                                  default=lambda self: self.env.company)
 
     @api.model
+    def get_notification_settings_for_payment(self, partner_id=None):
+        """Get notification settings that should send notifications for a payment.
+        Returns a dict with separate lists for each setting type."""
+
+        # Get all payment settings (always apply)
+        all_payment_settings = self.search([
+            ('notification_type', '=', 'all_payments'),
+            ('active', '=', True),
+            ('company_id', '=', self.env.company.id)
+        ])
+
+        # Get partner-specific settings (only if partner matches)
+        partner_specific_settings = self.env['payment.notification.settings']
+        if partner_id:
+            partner_specific_settings = self.search([
+                ('notification_type', '=', 'partner_specific'),
+                ('active', '=', True),
+                ('company_id', '=', self.env.company.id),
+                ('partner_ids', 'in', [partner_id])
+            ])
+
+        return {
+            'all_payment_settings': all_payment_settings,
+            'partner_specific_settings': partner_specific_settings
+        }
+
+    @api.model
     def get_notification_users(self, partner_id=None):
         """Get users who should receive notifications for a payment."""
         users = self.env['res.users']

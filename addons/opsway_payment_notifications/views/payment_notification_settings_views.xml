@@ -15,7 +15,7 @@
                     <filter name="inactive_filter" string="Inactive" domain="[('active', '=', False)]"/>
                     <group string="Group By">
                         <filter name="group_by_type" string="Notification Type" context="{'group_by': 'notification_type'}"/>
-                        <filter name="group_by_state" string="Record State" context="{'group_by': 'active'}"/>
+                        <filter name="group_by_state" string="Active" context="{'group_by': 'active'}"/>
                     </group>
                 </search>
             </field>
@@ -74,12 +74,7 @@
                                     </field>
                                 </group>
                                 <group>
-                                    <field name="partner_ids">
-                                        <list>
-                                            <field name="name"/>
-                                            <field name="email"/>
-                                        </list>
-                                    </field>
+                                    <field name="partner_ids" widget="many2many_tags"/>
                                 </group>
                             </page>
                         </notebook>

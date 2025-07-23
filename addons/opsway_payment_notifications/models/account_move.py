@@ -13,7 +13,7 @@ class AccountMove(models.Model):
         result = super().action_post()
 
         # Check if there are active notification settings
-        notification_settings = self.env['payment.notification.settings'].search([
+        notification_settings = self.env['payment.notification.settings'].sudo().search([
             ('active', '=', True),
             ('company_id', '=', self.env.company.id)
         ])
@@ -23,7 +23,7 @@ class AccountMove(models.Model):
 
         for move in self:
             if move._should_send_payment_notification():
-                move._send_payment_notification()
+                move.sudo()._send_payment_notification()
 
         return result
 
@@ -68,18 +68,12 @@ class AccountMove(models.Model):
             # Get partner from first debit line (assuming same partner for all)
             partner = debit_lines[0].partner_id if debit_lines else None
 
-            # Get users to notify
-            notification_settings = self.env['payment.notification.settings']
-            users_to_notify = notification_settings.get_notification_users(
+            # Get notification settings for this payment
+            notification_settings = self.env['payment.notification.settings'].sudo(
+            )
+            settings = notification_settings.get_notification_settings_for_payment(
                 partner_id=partner.id if partner else None
             )
-
-            # Remove the user who created this entry to avoid redundant notifications
-            if self.create_uid in users_to_notify:
-                users_to_notify -= self.create_uid
-
-            if not users_to_notify:
-                return
 
             # Prepare email template data
             template_values = {
@@ -93,37 +87,85 @@ class AccountMove(models.Model):
             # Send emails
             mail_template = self.env.ref(
                 'opsway_payment_notifications.payment_received_email_template'
-            )
+            ).sudo()
 
-            for user in users_to_notify:
-                if user.partner_id.email:
-                    # Generate template with render_fields to get subject and body
-                    template_data = mail_template.with_context(
-                        **template_values,
-                        recipient_name=user.name
-                    )._generate_template([self.id], ['subject', 'body_html'])
+            total_notifications_sent = 0
 
-                    # Clean subject to remove newlines and carriage returns
-                    subject = template_data.get(self.id, {}).get('subject', '')
-                    if subject:
-                        subject = subject.replace(
-                            '\n', ' ').replace('\r', ' ').strip()
-                        # Remove excessive whitespace
-                        subject = ' '.join(subject.split())
+            # Send notifications for "All Payments" settings
+            for setting in settings['all_payment_settings']:
+                users_to_notify = setting.all_payment_user_ids
 
-                    # Send email with cleaned subject
-                    mail_template.send_mail(
-                        self.id,
-                        force_send=True,
-                        email_values={
-                            'email_to': user.partner_id.email,
-                            'subject': subject
-                        }
-                    )
+                # Remove the user who created this entry to avoid redundant notifications
+                if self.create_uid in users_to_notify:
+                    users_to_notify -= self.create_uid
+
+                for user in users_to_notify:
+                    if user.partner_id.email:
+                        # Generate template with render_fields to get subject and body
+                        template_data = mail_template.with_context(
+                            **template_values,
+                            recipient_name=user.name
+                        )._generate_template([self.id], ['subject', 'body_html'])
+
+                        # Clean subject to remove newlines and carriage returns
+                        subject = template_data.get(
+                            self.id, {}).get('subject', '')
+                        if subject:
+                            subject = subject.replace(
+                                '\n', ' ').replace('\r', ' ').strip()
+                            # Remove excessive whitespace
+                            subject = ' '.join(subject.split())
+
+                        # Send email with cleaned subject
+                        mail_template.send_mail(
+                            self.id,
+                            force_send=True,
+                            email_values={
+                                'email_to': user.partner_id.email,
+                                'subject': subject
+                            }
+                        )
+                        total_notifications_sent += 1
+
+            # Send notifications for "Partner Specific" settings (only if partner matches)
+            for setting in settings['partner_specific_settings']:
+                users_to_notify = setting.partner_specific_user_ids
+
+                # Remove the user who created this entry to avoid redundant notifications
+                if self.create_uid in users_to_notify:
+                    users_to_notify -= self.create_uid
+
+                for user in users_to_notify:
+                    if user.partner_id.email:
+                        # Generate template with render_fields to get subject and body
+                        template_data = mail_template.with_context(
+                            **template_values,
+                            recipient_name=user.name
+                        )._generate_template([self.id], ['subject', 'body_html'])
+
+                        # Clean subject to remove newlines and carriage returns
+                        subject = template_data.get(
+                            self.id, {}).get('subject', '')
+                        if subject:
+                            subject = subject.replace(
+                                '\n', ' ').replace('\r', ' ').strip()
+                            # Remove excessive whitespace
+                            subject = ' '.join(subject.split())
+
+                        # Send email with cleaned subject
+                        mail_template.send_mail(
+                            self.id,
+                            force_send=True,
+                            email_values={
+                                'email_to': user.partner_id.email,
+                                'subject': subject
+                            }
+                        )
+                        total_notifications_sent += 1
 
             _logger.info(
                 f"Payment notification sent for move {
-                    self.name} to {len(users_to_notify)} users"
+                    self.name} to {total_notifications_sent} users"
             )
 
         except Exception as e:
