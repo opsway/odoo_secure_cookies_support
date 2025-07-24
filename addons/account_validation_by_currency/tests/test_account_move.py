@@ -1,34 +1,34 @@
+from datetime import datetime
 from odoo.exceptions import ValidationError
 from odoo.tests import tagged, common
-from datetime import datetime
 
 
 @tagged('post_install', '-at_install')
 class TestAccountMoveCurrency(common.TransactionCase):
     @classmethod
-    def setUpClass(self):
+    def setUpClass(cls):
         super().setUpClass()
 
-        self.env.ref('base.EUR').active = True
-        self.bank_eur = self.env['res.partner.bank'].create({
+        cls.env.ref('base.EUR').active = True
+        cls.bank_eur = cls.env['res.partner.bank'].create({
             'acc_number': 'Test_Bank_EUR',
-            'partner_id': self.env.ref('base.main_partner').id,
-            'currency_id': self.env.ref('base.EUR').id,
-            'company_id': self.env.company.id,
+            'partner_id': cls.env.ref('base.main_partner').id,
+            'currency_id': cls.env.ref('base.EUR').id,
+            'company_id': cls.env.company.id,
         })
-        self.bank_usd = self.env['res.partner.bank'].create({
+        cls.bank_usd = cls.env['res.partner.bank'].create({
             'acc_number': 'Test_Bank_USD',
-            'partner_id': self.env.ref('base.main_partner').id,
-            'currency_id': self.env.ref('base.USD').id,
-            'company_id': self.env.company.id,
+            'partner_id': cls.env.ref('base.main_partner').id,
+            'currency_id': cls.env.ref('base.USD').id,
+            'company_id': cls.env.company.id,
         })
 
-        Invoice = self.env['account.move']
-        self.invoice = Invoice.create({
+        Invoice = cls.env['account.move']
+        cls.invoice = Invoice.create({
             'move_type': 'out_invoice',
             'state': 'draft',
-            'partner_id': self.env.ref('base.res_partner_1').id,
-            'currency_id': self.env.ref('base.USD').id,
+            'partner_id': cls.env.ref('base.main_partner').id,
+            'currency_id': cls.env.ref('base.USD').id,
             'invoice_date': datetime.today().date(),
             'invoice_line_ids': [(0, 0, {
                 'name': 'Demo product line',
@@ -55,8 +55,8 @@ class TestAccountMoveCurrency(common.TransactionCase):
     def test_invoice_multi_currency(self):
         self.env.ref('base.EUR').active = False
         self.invoice.partner_bank_id = self.bank_eur.id
-        self.invoice.action_post()
-        self.assertEqual(self.invoice.state, 'posted')
+        with self.assertRaises(ValidationError):
+            self.invoice.action_post()
 
     def test_default_currency(self):
         self.bank_eur.currency_id = False
