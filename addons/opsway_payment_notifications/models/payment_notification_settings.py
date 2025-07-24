@@ -47,11 +47,13 @@ class PaymentNotificationSettings(models.Model):
         """Get notification settings that should send notifications for a payment.
         Returns a dict with separate lists for each setting type."""
 
-        # Get all payment settings (always apply)
+        # Get all payment settings (company-specific or global settings)
         all_payment_settings = self.search([
             ('notification_type', '=', 'all_payments'),
             ('active', '=', True),
-            ('company_id', '=', self.env.company.id)
+            '|',
+            ('company_id', '=', self.env.company.id),
+            ('company_id', '=', False)
         ])
 
         # Get partner-specific settings (only if partner matches)
@@ -60,7 +62,9 @@ class PaymentNotificationSettings(models.Model):
             partner_specific_settings = self.search([
                 ('notification_type', '=', 'partner_specific'),
                 ('active', '=', True),
+                '|',
                 ('company_id', '=', self.env.company.id),
+                ('company_id', '=', False),
                 ('partner_ids', 'in', [partner_id])
             ])
 
@@ -74,11 +78,13 @@ class PaymentNotificationSettings(models.Model):
         """Get users who should receive notifications for a payment."""
         users = self.env['res.users']
 
-        # Get users for all payments
+        # Get users for all payments (company-specific or global settings)
         all_payment_settings = self.search([
             ('notification_type', '=', 'all_payments'),
             ('active', '=', True),
-            ('company_id', '=', self.env.company.id)
+            '|',
+            ('company_id', '=', self.env.company.id),
+            ('company_id', '=', False)
         ])
         for setting in all_payment_settings:
             users |= setting.all_payment_user_ids
@@ -88,7 +94,9 @@ class PaymentNotificationSettings(models.Model):
             partner_settings = self.search([
                 ('notification_type', '=', 'partner_specific'),
                 ('active', '=', True),
+                '|',
                 ('company_id', '=', self.env.company.id),
+                ('company_id', '=', False),
                 ('partner_ids', 'in', [partner_id])
             ])
             for setting in partner_settings:

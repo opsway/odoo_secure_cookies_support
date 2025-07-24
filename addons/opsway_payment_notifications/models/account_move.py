@@ -12,10 +12,12 @@ class AccountMove(models.Model):
         """Override to send payment notifications after posting."""
         result = super().action_post()
 
-        # Check if there are active notification settings
+        # Check if there are active notification settings (including global ones)
         notification_settings = self.env['payment.notification.settings'].sudo().search([
             ('active', '=', True),
-            ('company_id', '=', self.env.company.id)
+            '|',
+            ('company_id', '=', self.env.company.id),
+            ('company_id', '=', False)
         ])
 
         if not notification_settings:
@@ -75,16 +77,7 @@ class AccountMove(models.Model):
                 partner_id=partner.id if partner else None
             )
 
-            # Prepare email template data
-            template_values = {
-                'partner_name': partner.display_name if partner else None,
-                'amount': currency.symbol + ' ' + str(total_amount),
-                'journal_name': self.journal_id.display_name,
-                'move_id': self.id,
-                'move_name': self.name,
-            }
-
-            # Send emails
+            # Get email template
             mail_template = self.env.ref(
                 'opsway_payment_notifications.payment_received_email_template'
             ).sudo()
@@ -101,28 +94,37 @@ class AccountMove(models.Model):
 
                 for user in users_to_notify:
                     if user.partner_id.email:
-                        # Generate template with render_fields to get subject and body
-                        template_data = mail_template.with_context(
-                            **template_values,
-                            recipient_name=user.name
-                        )._generate_template([self.id], ['subject', 'body_html'])
+                        # Prepare context for template rendering
+                        template_context = {
+                            'partner_name': partner.display_name if partner else None,
+                            'amount': f"{currency.symbol} {total_amount}",
+                            'journal_name': self.journal_id.display_name,
+                            'recipient_name': user.name,
+                        }
+
+                        # Generate email subject and body using template context
+                        rendered_template = mail_template.with_context(
+                            **template_context)._generate_template([self.id], ['subject', 'body_html'])
+
+                        subject = rendered_template.get(
+                            self.id, {}).get('subject', '')
+                        body_html = rendered_template.get(
+                            self.id, {}).get('body_html', '')
 
                         # Clean subject to remove newlines and carriage returns
-                        subject = template_data.get(
-                            self.id, {}).get('subject', '')
                         if subject:
                             subject = subject.replace(
                                 '\n', ' ').replace('\r', ' ').strip()
-                            # Remove excessive whitespace
                             subject = ' '.join(subject.split())
 
-                        # Send email with cleaned subject
+                        # Send email
                         mail_template.send_mail(
                             self.id,
                             force_send=True,
                             email_values={
                                 'email_to': user.partner_id.email,
-                                'subject': subject
+                                'subject': subject,
+                                'body_html': body_html,
                             }
                         )
                         total_notifications_sent += 1
@@ -137,28 +139,37 @@ class AccountMove(models.Model):
 
                 for user in users_to_notify:
                     if user.partner_id.email:
-                        # Generate template with render_fields to get subject and body
-                        template_data = mail_template.with_context(
-                            **template_values,
-                            recipient_name=user.name
-                        )._generate_template([self.id], ['subject', 'body_html'])
+                        # Prepare context for template rendering
+                        template_context = {
+                            'partner_name': partner.display_name if partner else None,
+                            'amount': f"{currency.symbol} {total_amount}",
+                            'journal_name': self.journal_id.display_name,
+                            'recipient_name': user.name,
+                        }
+
+                        # Generate email subject and body using template context
+                        rendered_template = mail_template.with_context(
+                            **template_context)._generate_template([self.id], ['subject', 'body_html'])
+
+                        subject = rendered_template.get(
+                            self.id, {}).get('subject', '')
+                        body_html = rendered_template.get(
+                            self.id, {}).get('body_html', '')
 
                         # Clean subject to remove newlines and carriage returns
-                        subject = template_data.get(
-                            self.id, {}).get('subject', '')
                         if subject:
                             subject = subject.replace(
                                 '\n', ' ').replace('\r', ' ').strip()
-                            # Remove excessive whitespace
                             subject = ' '.join(subject.split())
 
-                        # Send email with cleaned subject
+                        # Send email
                         mail_template.send_mail(
                             self.id,
                             force_send=True,
                             email_values={
                                 'email_to': user.partner_id.email,
-                                'subject': subject
+                                'subject': subject,
+                                'body_html': body_html,
                             }
                         )
                         total_notifications_sent += 1

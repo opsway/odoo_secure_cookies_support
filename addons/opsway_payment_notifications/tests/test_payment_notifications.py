@@ -328,3 +328,42 @@ class TestPaymentNotifications(TransactionCase):
                 # Verify content is preserved
                 self.assertIn(
                     'Payment from Test Partner has been received.', cleaned_subject)
+
+    def test_global_company_settings(self):
+        """Test that settings with empty company_id apply to all companies."""
+        # Create a global setting (no company specified)
+        global_setting = self.env['payment.notification.settings'].create({
+            'name': 'Global All Payments Notification',
+            'notification_type': 'all_payments',
+            'all_payment_user_ids': [(6, 0, [self.test_user_1.id])],
+            'company_id': False,  # No company specified - applies to all
+        })
+
+        # Test that global setting is retrieved for any company
+        settings = self.env['payment.notification.settings'].get_notification_settings_for_payment(
+        )
+
+        self.assertIn(global_setting, settings['all_payment_settings'])
+        self.assertIn(self.all_payments_setting,
+                      settings['all_payment_settings'])
+
+    def test_global_partner_specific_settings(self):
+        """Test that partner-specific settings with empty company_id apply to all companies."""
+        # Create a global partner-specific setting
+        global_partner_setting = self.env['payment.notification.settings'].create({
+            'name': 'Global Partner Specific Notification',
+            'notification_type': 'partner_specific',
+            'partner_specific_user_ids': [(6, 0, [self.test_user_2.id])],
+            'partner_ids': [(6, 0, [self.test_partner.id])],
+            'company_id': False,  # No company specified - applies to all
+        })
+
+        # Test that global setting is retrieved for the partner
+        settings = self.env['payment.notification.settings'].get_notification_settings_for_payment(
+            partner_id=self.test_partner.id
+        )
+
+        self.assertIn(global_partner_setting,
+                      settings['partner_specific_settings'])
+        self.assertIn(self.partner_specific_setting,
+                      settings['partner_specific_settings'])
