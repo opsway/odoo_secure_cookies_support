@@ -39,8 +39,7 @@ class PaymentNotificationSettings(models.Model):
     )
 
     active = fields.Boolean(string='Active', default=True)
-    company_id = fields.Many2one('res.company', string='Company',
-                                 default=lambda self: self.env.company)
+    company_id = fields.Many2one('res.company', string='Company')
 
     @api.model
     def get_notification_settings_for_payment(self, partner_id=None):

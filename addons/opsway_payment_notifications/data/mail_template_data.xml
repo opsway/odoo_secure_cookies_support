@@ -5,21 +5,22 @@
         <record id="payment_received_email_template" model="mail.template">
             <field name="name">Payment Received Notification</field>
             <field name="model_id" ref="account.model_account_move"/>
-            <field name="subject">% if ctx.get('partner_name'):Payment from ${ctx['partner_name']} has been received.% else:New Payment has been received.% endif</field>
+            <field name="subject">{{ 'Payment from ' + ctx['partner_name'] + ' has been received.' if ctx.get('partner_name') else 'New Payment has been received.' }}</field>
             <field name="body_html" type="html">
 <div style="margin: 0px; padding: 0px;">
-    <p>Hello ${ctx.get('recipient_name', 'User')},</p>
+    <p>Hello <t t-out="ctx.get('recipient_name', 'User')"/>,</p>
 
-    % if ctx.get('partner_name'):
-    <p>Payment of ${ctx.get('amount', '')} has been received from ${ctx['partner_name']} in ${ctx.get('journal_name', '')}.</p>
-    % else:
-    <p>Payment of ${ctx.get('amount', '')} has been received from an unidentified Partner in ${ctx.get('journal_name', '')}.</p>
-    % endif
+    <t t-if="ctx.get('partner_name')">
+        <p>Payment of <t t-out="ctx.get('amount', '')"/> has been received from <t t-out="ctx['partner_name']"/> in <t t-out="ctx.get('journal_name', '')"/>.</p>
+    </t>
+    <t t-else="">
+        <p>Payment of <t t-out="ctx.get('amount', '')"/> has been received from an unidentified Partner in <t t-out="ctx.get('journal_name', '')"/>.</p>
+    </t>
 
     <p>You can go ahead to process the Payment by applying it to the respective Customer Invoice(s).</p>
 
     <p>Best regards,<br/>
-    ${user.company_id.name}</p>
+    <t t-out="user.company_id.name"/></p>
 </div>
             </field>
             <field name="email_from">{{ (user.email_formatted or user.company_id.email_formatted or 'noreply@localhost') }}</field>
