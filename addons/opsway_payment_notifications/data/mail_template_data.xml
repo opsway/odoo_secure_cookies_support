@@ -24,7 +24,7 @@
 </div>
             </field>
             <field name="email_from">{{ (user.email_formatted or user.company_id.email_formatted or 'noreply@localhost') }}</field>
-            <field name="use_default_to">True</field>
+            <field name="use_default_to">False</field>
             <field name="auto_delete">True</field>
         </record>
 
