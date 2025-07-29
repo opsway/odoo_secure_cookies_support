@@ -2,10 +2,8 @@ name: Check Documentation Structure
 
 on:
   pull_request:
-    branches:
-      - 'stage'
-      - 'Live'
-    types: [ 'closed','opened','synchronize' ]
+  push:
+
 jobs:
   check-doc-structure:
     runs-on: ubuntu-latest
@@ -21,16 +19,8 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Clone reference repo
+      - name: Compare doc structure
+        if: secrets.GH_PAT != ''
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
-        run: |
-          if [[ $GH_PAT != '' ]]; then
-            git clone --depth 1 --branch main https://$GH_PAT@github.com/opsway/odoo_sop.git _reference_repo
-          else
-            git clone --depth 1 --branch main https://github.com/opsway/odoo_sop.git _reference_repo
-          fi
-
-      - name: Compare doc structure
-        run: |
-          python _reference_repo/scripts/compare_doc_structure.py
+        run: python scripts/doc/compare_doc_structure.py

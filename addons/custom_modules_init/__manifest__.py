@@ -13,6 +13,7 @@
         'account_validation_by_currency',
         'opsway_account_payment',
         'opsway_employee_bill',
+        'opsway_payment_notifications',
         'pdf_intellectual_property',
         'currency_name_res_partner_bank',
         'sh_email_enhancement',

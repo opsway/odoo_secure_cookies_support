@@ -30,7 +30,8 @@ class AccountMove(models.Model):
     @api.depends('invoice_line_ids.sequence')
     def _compute_employee_bill_first_line_id(self):
         for rec in self:
-            rec.employee_bill_first_line_id = rec.invoice_line_ids and rec.invoice_line_ids.sorted('sequence')[0]
+            rec.employee_bill_first_line_id = rec.invoice_line_ids and rec.invoice_line_ids.sorted('sequence')[
+                0]
 
     @api.depends('employee_bill_first_line_id')
     def _compute_employee_product_tag_id(self):
@@ -38,7 +39,8 @@ class AccountMove(models.Model):
             has_tag = bool(
                 rec.employee_bill_first_line_id and rec.employee_bill_first_line_id.product_id and
                 rec.employee_bill_first_line_id.product_id.product_tag_ids)
-            rec.employee_product_tag_id = has_tag and rec.employee_bill_first_line_id.product_id.product_tag_ids[0]
+            rec.employee_product_tag_id = has_tag and rec.employee_bill_first_line_id.product_id.product_tag_ids[
+                0]
 
     @api.depends('partner_id.lang')
     def _compute_need_multi_lang_report(self):
@@ -70,15 +72,16 @@ class AccountMove(models.Model):
     def _get_vendor_invoice_date(self):
         self.ensure_one()
 
-        return f'{self._get_months(self.date.month)} {self.date.day}, {self.date.year}'
+        return f'{self._get_months(self.invoice_date.month)} {self.invoice_date.day}, {self.invoice_date.year}'
 
     def _get_vendor_invoice_period(self):
         self.ensure_one()
-        return f'{self._get_months(self.date.month)} {self.date.year}'
+        return f'{self._get_months(self.invoice_date.month)} {self.invoice_date.year}'
 
     def _get_total_amount_in_word_pe(self):
         self.ensure_one()
-        res = self.currency_id.amount_to_text(self.amount_total).replace(',', '').capitalize()
+        res = self.currency_id.amount_to_text(
+            self.amount_total).replace(',', '').capitalize()
         lang = tools.get_lang(self.env)
         if lang.code == 'uk_UA':
             res = res.replace('and', 'і')
@@ -87,7 +90,7 @@ class AccountMove(models.Model):
     def _get_pe_report_filename(self):
         """Name of the PDF file: Invoice_<Vendor>_MM/YY """
         self.ensure_one()
-        return f'Invoice_{self.partner_id.name}_{self.date.strftime("%m/%y")}'
+        return f'Invoice_{self.partner_id.name}_{self.invoice_date.strftime("%m/%y")}'
 
     def action_post(self):
         res = super(AccountMove, self).action_post()

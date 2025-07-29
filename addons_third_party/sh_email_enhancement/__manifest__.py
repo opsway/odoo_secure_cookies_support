@@ -5,22 +5,22 @@
     "author": "Softhealer Technologies",
     "website": "https://www.softhealer.com",
     "support": "support@softhealer.com",
-    "version": "0.0.5",
+    "version": "0.0.4",
     "license": "OPL-1",
     "category": "Extra Tools",
     "summary": "Email Enhancement Set CC & BCC In Email Module Default CC & BCC On Mail Select CC & BCC For All Mail Email Management With CC & BCC Put Default Mail CC & BCC Email With Permanent CC & BCC Odoo Email BCC Mail BCC Email CC and BCC Default Set Email CC and BCC Default CC Default BCC Default cc on Email Default BCC on Email Compose Email Enhancement Odoo Customer Email CC BCC in Odoo Customer in CC Customer in BCC Email Management Software Email Productivity Solutions Email Communication Enhancement Email Optimization Tools Enhanced Email Email Workflow Improvement",
 
     "description": """This module enhances the email sending options by adding CC & BCC by default in odoo. You can select the person in CC & BCC whom you want to send the emails as by default. You can also change CC & BCC when you compose your email.""",
 
-    "depends": ['base', 'mail', 'base_setup'],
+    "depends": ['mail', 'base_setup'],
     "data": [
         "views/res_config_settings.xml",
         "views/mail_views.xml",
     ],
     'assets': {
         'web.assets_backend': [
-            'sh_email_enhancement/static/src/xml/message.xml',
-            'sh_email_enhancement/static/src/models/*/*.js',
+            'sh_email_enhancement/static/src/xml/**/*'
+            # 'sh_email_enhancement/static/src/models/*/*.js',
         ],
     },
     "images": ["static/description/background.png", ],
