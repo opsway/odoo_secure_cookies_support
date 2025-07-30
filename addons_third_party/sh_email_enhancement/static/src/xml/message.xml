@@ -1,18 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-<!--    <t t-extend="Message" t-inherit="mail.Message" t-inherit-mode="extension">-->
     <t t-inherit="mail.Message" t-inherit-mode="extension">
-        <xpath expr="//div[hasclass('o-mail-Message-bubble')]" position="after">
-            <span class="text-break" style="color: #adb5bd !important;">
-                <t t-if="message.cc_email">
-                    <span>CC: </span>
-                    <b><t t-esc="message.cc_email" /></b><br />
+        <xpath expr="//em[contains(@class, 'text-muted') and contains(text(), 'Subject:')]" position="before">
+            <div class="text-break" style="color: #adb5bd !important;">
+                <t t-if="this.emailState.cc_email">
+                    <span>CC: </span><b><t t-esc="this.emailState.cc_email" /></b><br />
                 </t>
-                <t t-if="message.bcc_email">
-                    <span>BCC: </span>
-                    <b><t t-esc="message.bcc_email" /></b><br />
+                <t t-if="this.emailState.bcc_email">
+                    <span>BCC: </span><b><t t-esc="this.emailState.bcc_email" /></b><br />
                 </t>
-            </span>
+            </div>
         </xpath>
     </t>
 </templates>
