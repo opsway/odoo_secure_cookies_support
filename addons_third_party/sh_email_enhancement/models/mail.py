@@ -1,26 +1,113 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) Softhealer Technologies.
 
-from odoo import fields, models, api, _, Command
+import base64
+import re
+import ast
 import logging
 import psycopg2
 import smtplib
-import base64
-from odoo.http import request
-import re
 from odoo import tools
+from odoo import fields, models, api, _, Command, modules
+from odoo.http import request
 from odoo.addons.base.models.ir_mail_server import MailDeliveryException
 from odoo.tools.safe_eval import safe_eval
-import ast
 from odoo.exceptions import UserError, ValidationError
 
 _logger = logging.getLogger(__name__)
+_test_logger = logging.getLogger('odoo.tests')
+
+
+class IrMailServer(models.Model):
+    _inherit = 'ir.mail_server'
+
+    @api.model
+    def send_email(self, message, mail_server_id=None, smtp_server=None, smtp_port=None,
+                   smtp_user=None, smtp_password=None, smtp_encryption=None,
+                   smtp_ssl_certificate=None, smtp_ssl_private_key=None,
+                   smtp_debug=False, smtp_session=None):
+        """Sends an email directly (no queuing).
+
+        No retries are done, the caller should handle MailDeliveryException in order to ensure that
+        the mail is never lost.
+
+        If the mail_server_id is provided, sends using this mail server, ignoring other smtp_* arguments.
+        If mail_server_id is None and smtp_server is None, use the default mail server (highest priority).
+        If mail_server_id is None and smtp_server is not None, use the provided smtp_* arguments.
+        If both mail_server_id and smtp_server are None, look for an 'smtp_server' value in server config,
+        and fails if not found.
+
+        :param message: the email.message.Message to send. The envelope sender will be extracted from the
+                        ``Return-Path`` (if present), or will be set to the default bounce address.
+                        The envelope recipients will be extracted from the combined list of ``To``,
+                        ``CC`` and ``BCC`` headers.
+        :param smtp_session: optional pre-established SMTP session. When provided,
+                             overrides `mail_server_id` and all the `smtp_*` parameters.
+                             Passing the matching `mail_server_id` may yield better debugging/log
+                             messages. The caller is in charge of disconnecting the session.
+        :param mail_server_id: optional id of ir.mail_server to use for sending. overrides other smtp_* arguments.
+        :param smtp_server: optional hostname of SMTP server to use
+        :param smtp_encryption: optional TLS mode, one of 'none', 'starttls' or 'ssl' (see ir.mail_server fields for explanation)
+        :param smtp_port: optional SMTP port, if mail_server_id is not passed
+        :param smtp_user: optional SMTP user, if mail_server_id is not passed
+        :param smtp_password: optional SMTP password to use, if mail_server_id is not passed
+        :param smtp_ssl_certificate: filename of the SSL certificate used for authentication
+        :param smtp_ssl_private_key: filename of the SSL private key used for authentication
+        :param smtp_debug: optional SMTP debug flag, if mail_server_id is not passed
+        :return: the Message-ID of the message that was just sent, if successfully sent, otherwise raises
+                 MailDeliveryException and logs root cause.
+        """
+        smtp = smtp_session
+        if not smtp:
+            smtp = self.connect(
+                smtp_server, smtp_port, smtp_user, smtp_password, smtp_encryption,
+                smtp_from=message['From'], ssl_certificate=smtp_ssl_certificate, ssl_private_key=smtp_ssl_private_key,
+                smtp_debug=smtp_debug, mail_server_id=mail_server_id,)
+
+        smtp_from, smtp_to_list, message = self._prepare_email_message(
+            message, smtp)
+        smtp_to_list = smtp_to_list + self.env.company.email_cc_ids.mapped(
+            'email') + self.env.company.email_bcc_ids.mapped('email')
+
+        # Do not actually send emails in testing mode!
+        if modules.module.current_test:
+            _test_logger.debug("skip sending email in test mode")
+            return message['Message-Id']
+
+        try:
+            message_id = message['Message-Id']
+
+            smtp.send_message(message, smtp_from, smtp_to_list)
+
+            # do not quit() a pre-established smtp_session
+            if not smtp_session:
+                smtp.quit()
+        except smtplib.SMTPServerDisconnected:
+            raise
+        except Exception as e:
+            msg = _(
+                "Mail delivery failed via SMTP server '%(server)s'.\n%(exception_name)s: %(message)s",
+                server=smtp_server,
+                exception_name=e.__class__.__name__,
+                message=e,
+            )
+            _logger.info(msg)
+            raise MailDeliveryException(_("Mail Delivery Failed"), msg)
+        return message_id
+
+    # def _prepare_email_message(self, message, smtp_session):
+    #     res = super(IrMailServer, self)._prepare_email_message(message,smtp_session)
+    #     print("\n\n\nres",1)
+    #     res[1] = res[1] + self.env.company.email_cc_ids.mapped('email') + self.env.company.email_bcc_ids.mapped('email')
+    #     return res
 
 
 class Mail(models.Model):
     _inherit = "mail.mail"
 
-    def _send(self, auto_commit=False, raise_exception=False, smtp_session=None, alias_domain_id=False):
+    # Replace this method
+    def _send(self, auto_commit=False, raise_exception=False, smtp_session=None, alias_domain_id=False,
+              mail_server=False, post_send_callback=None):
         IrMailServer = self.env['ir.mail_server']
         # Only retrieve recipient followers of the mails if needed
         mails_with_unfollow_link = self.filtered(
@@ -34,7 +121,6 @@ class Mail(models.Model):
             success_pids = []
             failure_reason = None
             failure_type = None
-            processing_pid = None
             mail = None
             try:
                 mail = self.browse(mail_id)
@@ -70,7 +156,8 @@ class Mail(models.Model):
                         ['notification_status', 'failure_type', 'failure_reason'])
 
                 # protect against ill-formatted email_from when formataddr was used on an already formatted email
-                emails_from = tools.email_split_and_format(mail.email_from)
+                emails_from = tools.mail.email_split_and_format_normalize(
+                    mail.email_from)
                 email_from = emails_from[0] if emails_from else mail.email_from
 
                 # build an RFC2822 email.message.Message object and send it without queuing
@@ -78,7 +165,9 @@ class Mail(models.Model):
                 # TDE note: could be great to pre-detect missing to/cc and skip sending it
                 # to go directly to failed state update
                 email_list = mail._prepare_outgoing_list(
-                    recipients_follower_status)
+                    mail_server=mail_server or mail.mail_server_id,
+                    recipients_follower_status=recipients_follower_status,
+                )
 
                 # send each sub-email
                 for email in email_list:
@@ -92,6 +181,12 @@ class Mail(models.Model):
                     if mail['bcc_email']:
                         custom_bcc.append(mail['bcc_email'])
                     sh_email_bcc = mail['bcc_email']
+                    # custom cc code of softhelaer
+
+                    # give indication to 'send_mail' about emails already considered
+                    # as being valid
+                    email_to_normalized = email.pop('email_to_normalized', [])
+                    # if given, contextualize sending using alias domains
                     if alias_domain_id:
                         alias_domain = self.env['mail.alias.domain'].sudo().browse(
                             alias_domain_id)
@@ -99,17 +194,20 @@ class Mail(models.Model):
                             domain_notifications_email=alias_domain.default_from_email,
                             domain_bounce_address=email['headers'].get(
                                 'Return-Path') or alias_domain.bounce_email,
+                            send_validated_to=email_to_normalized,
                         )
                     else:
-                        SendIrMailServer = IrMailServer
+                        SendIrMailServer = IrMailServer.with_context(
+                            send_validated_to=email_to_normalized)
                     msg = SendIrMailServer.build_email(
                         email_from=email_from,
                         email_to=email['email_to'],
                         subject=email['subject'],
                         body=email['body'],
                         body_alternative=email['body_alternative'],
-                        email_cc=email_cc if email_cc else None,
-                        email_bcc=sh_email_bcc,
+                        # email_cc=email['email_cc'],
+                        email_cc=email_cc if email_cc else None,  # SH
+                        email_bcc=sh_email_bcc,  # SH
                         reply_to=email['reply_to'],
                         attachments=email['attachments'],
                         message_id=email['message_id'],
@@ -144,8 +242,15 @@ class Mail(models.Model):
                 if res:  # mail has been sent at least once, no major exception occurred
                     mail.write({'state': 'sent', 'message_id': res,
                                'failure_reason': False})
-                    _logger.info(
-                        'Mail with ID %r and Message-Id %r successfully sent', mail.id, mail.message_id)
+                    if not modules.module.current_test:
+                        _logger.info(
+                            "Mail with ID %r and Message-Id %r from %r to (redacted) %r successfully sent",
+                            mail.id,
+                            mail.message_id,
+                            tools.email_normalize(msg['from']),
+                            tools.mail.email_anonymize(
+                                tools.email_normalize(msg['to']))
+                        )
                     # /!\ can't use mail.state here, as mail.refresh() will cause an error
                     # see revid:odo@openerp.com-20120622152536-42b2s28lvdv3odyr in 6.1
                 mail._postprocess_sent_message(
@@ -173,7 +278,7 @@ class Mail(models.Model):
                     error_code = e.args[0]
                     if len(e.args) > 1 and error_code == IrMailServer.NO_VALID_FROM:
                         # log failing email in additional arguments message
-                        failure_reason = tools.ustr(e.args[1])
+                        failure_reason = str(e.args[1])
                     else:
                         failure_reason = error_code
                     if error_code == IrMailServer.NO_VALID_FROM:
@@ -182,7 +287,7 @@ class Mail(models.Model):
                         failure_type = "mail_from_missing"
                 # generic (unknown) error as fallback
                 if not failure_reason:
-                    failure_reason = tools.ustr(e)
+                    failure_reason = tools.exception_to_unicode(e)
                 if not failure_type:
                     failure_type = "unknown"
 
@@ -205,9 +310,12 @@ class Mail(models.Model):
                             value = '. '.join(e.args)
                         raise MailDeliveryException(value)
                     raise
-
             if auto_commit is True:
+                if post_send_callback:
+                    post_send_callback([mail_id])
                 self._cr.commit()
+        if post_send_callback:
+            post_send_callback(self.ids)
         return True
 
 
@@ -218,8 +326,8 @@ class Message(models.Model):
         'res.partner', 'message_cc_partner_rel', 'partner_id', 'message_id', string="Email CC")
     email_bcc_ids = fields.Many2many(
         'res.partner', 'message_bcc_partner_rel', 'partner_id', 'message_id', string="Email BCC")
-    bcc_email = fields.Char("Email BCC")
-    cc_email = fields.Char("Email CC")
+    bcc_email = fields.Char(" Email BCC")
+    cc_email = fields.Char(" Email CC")
 
     @api.model_create_multi
     def create(self, values_list):
@@ -368,9 +476,9 @@ class MailComposeMessage(models.TransientModel):
     _inherit = 'mail.compose.message'
 
     email_cc_ids = fields.Many2many(
-        'res.partner', 'message_compose_cc_partner_rel', 'partner_id', 'message_id', string="Email CC")
+        'res.partner', 'message_compose_cc_partner_rel', 'partner_id', 'message_id', string="Email CC ")
     email_bcc_ids = fields.Many2many(
-        'res.partner', 'message_compose_bcc_partner_rel', 'partner_id', 'message_id', string="Email BCC")
+        'res.partner', 'message_compose_bcc_partner_rel', 'partner_id', 'message_id', string="Email BCC ")
     bcc_email = fields.Char("Email BCC")
     cc_email = fields.Char("Email CC")
 
@@ -420,102 +528,3 @@ class MailComposeMessage(models.TransientModel):
                 messages.bcc_email = ','.join(
                     self.email_bcc_ids.mapped('email'))
         return messages
-
-    # def get_mail_values(self, res_ids):
-    #     """Generate the values that will be used by send_mail to create mail_messages
-    #     or mail_mails. """
-    #     self.ensure_one()
-    #     results = dict.fromkeys(res_ids, False)
-    #     rendered_values = {}
-    #     mass_mail_mode = self.composition_mode == 'mass_mail'
-    #
-    #     # render all template-based value at once
-    #     if mass_mail_mode and self.model:
-    #         rendered_values = self.render_message(res_ids)
-    #     # compute alias-based reply-to in batch
-    #     reply_to_value = dict.fromkeys(res_ids, None)
-    #     if mass_mail_mode and not self.reply_to_force_new:
-    #         records = self.env[self.model].browse(res_ids)
-    #         reply_to_value = records._notify_get_reply_to(default=False)
-    #         # when having no specific reply-to, fetch rendered email_from value
-    #         for res_id, reply_to in reply_to_value.items():
-    #             if not reply_to:
-    #                 reply_to_value[res_id] = rendered_values.get(
-    #                     res_id, {}).get('email_from', False)
-    #
-    #     for res_id in res_ids:
-    #         email_bcc_list = []
-    #         email_cc_list = []
-    #         if self.email_bcc_ids:
-    #             for bcc_email in self.email_bcc_ids:
-    #                 email_bcc_list.append(bcc_email.email)
-    #         if self.email_cc_ids:
-    #             for cc_email in self.email_cc_ids:
-    #                 email_cc_list.append(cc_email.email)
-    #         email_bcc = ','.join(email_bcc_list)
-    #         email_cc = ','.join(email_cc_list)
-    #         # static wizard (mail.message) values
-    #         mail_values = {
-    #             'subject': self.subject,
-    #             'body': self.body or '',
-    #             'parent_id': self.parent_id and self.parent_id.id,
-    #             'partner_ids': [partner.id for partner in self.partner_ids],
-    #             'attachment_ids': [attach.id for attach in self.attachment_ids],
-    #             'author_id': self.author_id.id,
-    #             'email_from': self.email_from,
-    #             'record_name': self.record_name,
-    #             'reply_to_force_new': self.reply_to_force_new,
-    #             'mail_server_id': self.mail_server_id.id,
-    #             'mail_activity_type_id': self.mail_activity_type_id.id,
-    #             'message_type': 'email' if mass_mail_mode else self.message_type,
-    #             'bcc_email': email_bcc,
-    #             'cc_email': email_cc,
-    #             'email_cc_ids': [(6, 0, self.email_cc_ids.ids)],
-    #             'email_bcc_ids': [(6, 0, self.email_bcc_ids.ids)],
-    #         }
-    #
-    #         # mass mailing: rendering override wizard static values
-    #         if mass_mail_mode and self.model:
-    #             record = self.env[self.model].browse(res_id)
-    #             mail_values['headers'] = repr(
-    #                 record._notify_by_email_get_headers())
-    #             # keep a copy unless specifically requested, reset record name (avoid browsing records)
-    #             mail_values.update(is_notification=not self.auto_delete_message,
-    #                                model=self.model, res_id=res_id, record_name=False)
-    #             # auto deletion of mail_mail
-    #             if self.auto_delete or self.template_id.auto_delete:
-    #                 mail_values['auto_delete'] = False
-    #             # rendered values using template
-    #             email_dict = rendered_values[res_id]
-    #             mail_values['partner_ids'] += email_dict.pop('partner_ids', [])
-    #             mail_values.update(email_dict)
-    #             if not self.reply_to_force_new:
-    #                 mail_values.pop('reply_to')
-    #                 if reply_to_value.get(res_id):
-    #                     mail_values['reply_to'] = reply_to_value[res_id]
-    #             if self.reply_to_force_new and not mail_values.get('reply_to'):
-    #                 mail_values['reply_to'] = mail_values['email_from']
-    #             # mail_mail values: body -> body_html, partner_ids -> recipient_ids
-    #             mail_values['body_html'] = mail_values.get('body', '')
-    #             mail_values['recipient_ids'] = [Command.link(
-    #                 id) for id in mail_values.pop('partner_ids', [])]
-    #
-    #             # process attachments: should not be encoded before being processed by message_post / mail_mail create
-    #             mail_values['attachments'] = [(name, base64.b64decode(
-    #                 enc_cont)) for name, enc_cont in email_dict.pop('attachments', list())]
-    #             attachment_ids = []
-    #             for attach_id in mail_values.pop('attachment_ids'):
-    #                 new_attach_id = self.env['ir.attachment'].browse(
-    #                     attach_id).copy({'res_model': self._name, 'res_id': self.id})
-    #                 attachment_ids.append(new_attach_id.id)
-    #             attachment_ids.reverse()
-    #             mail_values['attachment_ids'] = self.env['mail.thread'].with_context(attached_to=record)._message_post_process_attachments(
-    #                 mail_values.pop('attachments', []),
-    #                 attachment_ids,
-    #                 {'model': 'mail.message', 'res_id': 0}
-    #             )['attachment_ids']
-    #
-    #         results[res_id] = mail_values
-    #
-    #     results = self._process_state(results)
-    #     return results
