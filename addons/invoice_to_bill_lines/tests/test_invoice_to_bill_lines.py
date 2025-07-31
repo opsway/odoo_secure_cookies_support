@@ -120,3 +120,54 @@ class TestInvoiceToBillLines(TransactionCase):
         self.assertEqual(product.type, 'service')
         self.assertTrue(product.purchase_ok)
         self.assertFalse(product.sale_ok)
+
+    def test_credit_notes_excluded(self):
+        """Test that credit notes (out_refund) are excluded from bill line generation"""
+        current_date = date.today()
+
+        # Create regular customer invoice
+        customer_invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.test_partner.id,
+            'invoice_date': current_date,
+            'invoice_line_ids': [(0, 0, {
+                'product_id': self.test_product.id,
+                'quantity': 1,
+                'price_unit': 150.0,
+            })]
+        })
+        customer_invoice.action_post()
+
+        # Create credit note for same month
+        credit_note = self.env['account.move'].create({
+            'move_type': 'out_refund',
+            'partner_id': self.test_partner.id,
+            'invoice_date': current_date,
+            'invoice_line_ids': [(0, 0, {
+                'product_id': self.test_product.id,
+                'quantity': 1,
+                'price_unit': 50.0,
+            })]
+        })
+        credit_note.action_post()
+
+        # Create vendor bill
+        vendor_bill = self.env['account.move'].create({
+            'move_type': 'in_invoice',
+            'partner_id': self.vendor_partner.id,
+            'invoice_date_filter': current_date,
+        })
+
+        # Generate bill lines
+        vendor_bill.action_generate_bill_lines_from_invoices()
+
+        # Verify only one line was created (from invoice, not credit note)
+        self.assertEqual(len(vendor_bill.invoice_line_ids), 1)
+        bill_line = vendor_bill.invoice_line_ids[0]
+
+        # Verify it's from the invoice, not the credit note
+        self.assertIn(customer_invoice.name, bill_line.name)
+        self.assertEqual(bill_line.price_unit, customer_invoice.amount_total)
+
+        # Verify credit note is not included
+        self.assertNotIn(credit_note.name, bill_line.name)

@@ -33,9 +33,9 @@ class AccountMove(models.Model):
         last_day = datetime(
             year, month, calendar.monthrange(year, month)[1]).date()
 
-        # Find all customer invoices in the selected month
+        # Find all customer invoices in the selected month (excluding credit notes)
         customer_invoices = self.env['account.move'].search([
-            ('move_type', 'in', ['out_invoice', 'out_refund']),
+            ('move_type', '=', 'out_invoice'),
             ('state', '=', 'posted'),
             ('invoice_date', '>=', first_day),
             ('invoice_date', '<=', last_day),
