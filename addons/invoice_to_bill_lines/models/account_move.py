@@ -14,6 +14,12 @@ class AccountMove(models.Model):
         default=fields.Date.context_today
     )
 
+    bill_line_quantity = fields.Float(
+        string='Bill Line Quantity',
+        help='Quantity to be used for all generated bill lines',
+        default=1.0
+    )
+
     def action_generate_bill_lines_from_invoices(self):
         """Generate bill lines from customer invoices for the selected month"""
         if self.move_type not in ['in_invoice', 'in_refund']:
@@ -57,11 +63,16 @@ class AccountMove(models.Model):
         # Create bill lines for each invoice
         bill_lines_data = []
         for invoice in customer_invoices:
+            # Use parent company name if available, otherwise use partner name
+            customer_name = (invoice.partner_id.parent_id.name
+                             if invoice.partner_id.parent_id
+                             else invoice.partner_id.name)
+
             line_data = {
                 'product_id': partner_fee_product.id,
-                'name': _('Invoice %s - %s') % (invoice.name, invoice.partner_id.name),
-                'quantity': 1,
-                'price_unit': invoice.amount_total,
+                'name': _('Invoice %s - %s') % (invoice.name, customer_name),
+                'quantity': self.bill_line_quantity,
+                'price_unit': invoice.amount_total_signed,
                 'account_id': partner_fee_product.property_account_expense_id.id or
                 partner_fee_product.categ_id.property_account_expense_categ_id.id,
             }
