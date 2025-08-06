@@ -8,6 +8,8 @@
             <xpath expr="//page[@id='other_tab']/group/group[@name='accounting_info_group']" position="inside">
                 <field name="invoice_date_filter"
                        invisible="move_type not in ['in_invoice', 'in_refund']"/>
+                <field name="bill_line_quantity"
+                       invisible="move_type not in ['in_invoice', 'in_refund']"/>
                 <button name="action_generate_bill_lines_from_invoices"
                         string="Generate Lines from Invoices"
                         type="object"
