@@ -25,7 +25,11 @@ on:
   repository_dispatch: # Triggered by repository-dispatch event
     types: [ coder-flow ]
 
-run-name: Trigger Coder Agent for ${{ inputs.jira_id }}
+run-name: Trigger Coder Agent for ${{ github.event.client_payload.jira_id || inputs.jira_id }}
+
+concurrency:
+  group: coder-${{ github.event.client_payload.jira_id || inputs.jira_id }}
+  cancel-in-progress: true
 
 jobs:
   coder-agent-dev:
@@ -48,6 +52,7 @@ jobs:
       DATABASE_SERVICE_NAME: ${{ vars.DATABASE_SERVICE_NAME }}
       odoo_branch: ${{ vars.ODOO_BRANCH }}
       ai_tooling_branch: 'dev'
+      upstream_mode: ${{ vars.UPSTREAM_MODE }}
     secrets:
       JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
       ODOO_ENTERPRISE_SECRET: ${{ secrets.ODOO_ENTERPRISE_SECRET }}
@@ -76,6 +81,7 @@ jobs:
       DATABASE_SERVICE_NAME: ${{ vars.DATABASE_SERVICE_NAME }}
       odoo_branch: ${{ vars.ODOO_BRANCH }}
       ai_tooling_branch: 'master'
+      upstream_mode: ${{ vars.UPSTREAM_MODE }}
     secrets:
       JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
       ODOO_ENTERPRISE_SECRET: ${{ secrets.ODOO_ENTERPRISE_SECRET }}
