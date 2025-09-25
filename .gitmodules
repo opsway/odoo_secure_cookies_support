@@ -1,4 +1,0 @@
-[submodule "submodules/one2many_duplicate_lines"]
-	path = submodules/one2many_duplicate_lines
-	url = git@github.com:opsway/one2many_duplicate_lines.git
-	branch = 18.0
