@@ -1,0 +1,37 @@
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&amp;display=swap"
+      rel="stylesheet"></link>
+<section class="py-3">
+    <div class="container" style="font-family: 'Open Sans', sans-serif;">
+        <div class="p-5 bg-white"
+             style="border-radius: 10px; box-shadow: -40px 40px 160px 0 rgb(0 0 0 / 8%), -8px 8px 15px 0 rgb(120 120 120 / 4%), 3px 3px 30px 0 rgb(0 0 0 / 4%) !important;">
+            <h1 class="text-center" style="font-size: 48px;">
+                Secure Cookies Support
+            </h1>
+            <h2 class="text-center" style="font-size: 20px; font-weight: 400;">
+                Adds the Secure flag to every session and CSRF cookie served by Odoo, so cookies are only transmitted
+                over HTTPS, helping you meet modern browser and regulatory security requirements.
+            </h2>
+            <h3>Usage</h3>
+            <ol>
+                <li>Make sure your Odoo instance is reachable via <code>https://</code>.</li>
+                <li>Go to Settings / Technical / System Parameters.</li>
+                <li>Create or update the parameter
+                    <code>secure_cookies</code>
+                    and set its value to
+                    <code>1</code>
+                    to enable secure cookies.
+                </li>
+                <li>(Optional) Change the value to
+                    <code>0</code>
+                    to disable the feature.
+                </li>
+            </ol>
+            <p>
+                <em>Tip:</em>
+                Users may need to clear their browser cookies after the change so the
+                <code>Secure</code>
+                attribute is applied to session cookies.
+            </p>
+        </div>
+    </div>
+</section>
