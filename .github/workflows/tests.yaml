@@ -10,7 +10,7 @@ jobs:
     name: Odoo tests
     runs-on: ubuntu-latest
     container:
-      image: quay.io/opsway/odoo:opsway
+      image: quay.io/opsway/odoo:ops19
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       PGHOST: postgres

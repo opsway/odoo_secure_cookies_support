@@ -1,6 +1,6 @@
 {
     'name': 'Email Enhancement Invoice Extension',
-    'version': '18.0.1.0',
+    'version': '19.0.1.0',
     'author': 'OpsWay',
     "description": "Email Enhancement for Invoices wizard",
     'license': "Other proprietary",

@@ -1,6 +1,6 @@
 {
     'name': 'Set default Recipient Bank Account for Customer',
-    'version': '18.0.1.0.0',
+    'version': '19.0.1.0.0',
     'summary': '',
     'author': 'OpsWay',
     'description': "Populate Invoice default Recipient Bank from linked Customer",

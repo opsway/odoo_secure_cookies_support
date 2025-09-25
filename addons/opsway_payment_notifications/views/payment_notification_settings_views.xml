@@ -13,7 +13,7 @@
                     <filter string="All" name="all" domain="['|', ('active', '=', False), ('active', '=', True)]" />
                     <filter name="active_filter" string="Active" domain="[('active', '=', True)]"/>
                     <filter name="inactive_filter" string="Inactive" domain="[('active', '=', False)]"/>
-                    <group string="Group By">
+                    <group>
                         <filter name="group_by_type" string="Notification Type" context="{'group_by': 'notification_type'}"/>
                         <filter name="group_by_state" string="Active" context="{'group_by': 'active'}"/>
                     </group>

@@ -2,7 +2,7 @@ version: '2'
 services:
   opsway-web:
     container_name: opsway-web
-    image: quay.io/opsway/odoo:opsway
+    image: quay.io/opsway/odoo:ops19
     build: ../..
     user: odoo
     depends_on:

@@ -1,6 +1,6 @@
 {
     'name': 'Invoice to Bill Lines',
-    'version': '18.0.1.0.0',
+    'version': '19.0.1.0.0',
     'category': 'Accounting',
     'summary': 'Transform invoices into bill lines based on monthly selection',
     'description': """

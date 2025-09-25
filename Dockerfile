@@ -38,9 +38,20 @@ RUN apt-get update && \
         python3-xlwt \
         git \
         openssh-client \
-        xz-utils \
-        wkhtmltopdf && \
-    rm -rf /var/lib/apt/lists/*
+        xz-utils && \
+    if [ -z "${TARGETARCH}" ]; then \
+        TARGETARCH="$(dpkg --print-architecture)"; \
+    fi; \
+    WKHTMLTOPDF_ARCH=${TARGETARCH} && \
+    case ${TARGETARCH} in \
+    "amd64") WKHTMLTOPDF_ARCH=amd64 && WKHTMLTOPDF_SHA=967390a759707337b46d1c02452e2bb6b2dc6d59  ;; \
+    "arm64")  WKHTMLTOPDF_SHA=90f6e69896d51ef77339d3f3a20f8582bdf496cc  ;; \
+    "ppc64le" | "ppc64el") WKHTMLTOPDF_ARCH=ppc64el && WKHTMLTOPDF_SHA=5312d7d34a25b321282929df82e3574319aed25c  ;; \
+    esac \
+    && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.jammy_${WKHTMLTOPDF_ARCH}.deb \
+    && echo ${WKHTMLTOPDF_SHA} wkhtmltox.deb | sha1sum -c - \
+    && apt-get install -y --no-install-recommends ./wkhtmltox.deb \
+    && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
 
 # install latest postgresql-client
 RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ noble-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
@@ -60,9 +71,9 @@ RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ noble-pgdg main' > /etc/a
 RUN npm install -g rtlcss
 
 # Install Odoo
-ENV ODOO_VERSION 18.0
-ARG ODOO_RELEASE=20250710
-ARG ODOO_SHA=7859985576e247950959a2158c10af319e716e3e
+ENV ODOO_VERSION 19.0
+ARG ODOO_RELEASE=20250918
+ARG ODOO_SHA=3b7db7702c236b9060d5668a39a5ac61944b1153
 RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}.${ODOO_RELEASE}_all.deb \
     && echo "${ODOO_SHA} odoo.deb" | sha1sum -c - \
     && apt-get update \

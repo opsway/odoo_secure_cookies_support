@@ -7,7 +7,7 @@
             <field name="model">account.move.send.wizard</field>
             <field name="inherit_id" ref="account.account_move_send_wizard_form"/>
             <field name="arch" type="xml">
-                <field name="mail_subject" position="before">
+                <field name="subject" position="before">
                     <field name="email_cc_ids" widget="many2many_tags_email" placeholder="Add contacts to notify..."/>
                     <field name="email_bcc_ids" widget="many2many_tags_email" placeholder="Add contacts to notify..."/>
                 </field>

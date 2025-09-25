@@ -1,4 +1,4 @@
-IMAGE_ODOO:=quay.io/opsway/odoo:opsway
+IMAGE_ODOO:=quay.io/opsway/odoo:ops19
 
 all: build push
 

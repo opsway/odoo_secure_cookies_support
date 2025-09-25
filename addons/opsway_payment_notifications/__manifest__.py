@@ -1,6 +1,6 @@
 {
     'name': 'Opsway Payment Notifications',
-    'version': '18.0.1.0.0',
+    'version': '19.0.1.0.0',
     'category': 'Accounting/Accounting',
     'summary': 'Email notifications for received payments',
     'description': """
