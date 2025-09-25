@@ -1,9 +1,0 @@
-Task INT-580 completed successfully. Replaced web_one2many_duplicate_cr with one2many_duplicate_lines from https://github.com/opsway/one2many_duplicate_lines as a submodule.
-
-Key changes:
-1. Added one2many_duplicate_lines as submodule in /submodules/one2many_duplicate_lines
-2. Updated env/local/odoo.conf to include the new submodule path: /mnt/submodules/one2many_duplicate_lines
-3. Removed old web_one2many_duplicate_cr module from /addons/
-4. Updated custom_modules_init/__manifest__.py to depend on one2many_duplicate_lines instead of web_one2many_duplicate_cr
-
-Both modules provide similar functionality for duplicating records in one2many fields, but the new module is the official OpsWay proprietary version that should be used consistently across projects.
