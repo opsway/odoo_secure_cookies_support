@@ -1,0 +1,122 @@
+name: Auto-PR subtree split branch to target branch
+
+on:
+  push:
+    branches:
+      - 'subtree-split-*'  # Triggers on any subtree-split-* branch
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  prepare-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract split branch and target
+        id: branch
+        run: |
+          SPLIT_BRANCH="${GITHUB_REF#refs/heads/}"
+          # Infer target branch from split branch name
+          # Supports: subtree-split-v19, subtree-split-19, subtree-split-19.0
+          if [[ "$SPLIT_BRANCH" =~ ^subtree-split-([vV]?)([0-9]+)(\.([0-9]+))?$ ]]; then
+            MAJOR="${BASH_REMATCH[2]}"
+            MINOR="${BASH_REMATCH[4]}"
+            if [[ -n "$MINOR" ]]; then
+              TARGET_BRANCH="${MAJOR}.${MINOR}"
+            else
+              TARGET_BRANCH="${MAJOR}.0"
+            fi
+          else
+            TARGET_BRANCH="main"
+          fi
+          SYNC_BRANCH="sync-from-${SPLIT_BRANCH}"
+
+          echo "split_branch=$SPLIT_BRANCH"   >> $GITHUB_OUTPUT
+          echo "target_branch=$TARGET_BRANCH" >> $GITHUB_OUTPUT
+          echo "sync_branch=$SYNC_BRANCH"     >> $GITHUB_OUTPUT
+
+          echo "Split branch:  $SPLIT_BRANCH"
+          echo "Target branch: $TARGET_BRANCH"
+          echo "Sync branch:   $SYNC_BRANCH"
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Prepare sync branch by merging split into subdirectory
+        run: |
+          set -e
+          # Ensure both branches are present locally
+          git fetch origin "${{ steps.branch.outputs.target_branch }}" "${{ steps.branch.outputs.split_branch }}"
+
+          # Create/overwrite sync branch from target branch
+          git checkout -B "${{ steps.branch.outputs.sync_branch }}" "origin/${{ steps.branch.outputs.target_branch }}"
+
+          # Determine subdirectory where code should live (default to repo name)
+          SUBDIR="${SUBTREE_SUBDIR:-${GITHUB_REPOSITORY##*/}}"
+          echo "Subdirectory for import: $SUBDIR/"
+
+          # Start a merge to record ancestry, but keep current tree
+          git merge -s ours --no-commit "origin/${{ steps.branch.outputs.split_branch }}" || true
+
+          # Replace the subdirectory content with the split branch tree
+          git rm -r --ignore-unmatch "$SUBDIR" >/dev/null 2>&1 || true
+          git read-tree --prefix="$SUBDIR/" -u "origin/${{ steps.branch.outputs.split_branch }}"
+
+          # Finalize merge commit
+          git commit -m "Sync subtree changes from ${{ steps.branch.outputs.split_branch }} into ${{ steps.branch.outputs.target_branch }} under $SUBDIR/"
+
+      - name: Push sync branch
+        run: |
+          SYNC="${{ steps.branch.outputs.sync_branch }}"
+          # Fetch remote sync branch so --force-with-lease has a ref to compare
+          git fetch origin "$SYNC" || true
+          if git push -u origin "$SYNC"; then
+            echo "✓ Pushed sync branch $SYNC"
+          else
+            echo "Non-fast-forward; attempting safe update with --force-with-lease"
+            git push -u origin "$SYNC" --force-with-lease
+            echo "✓ Updated sync branch $SYNC (force-with-lease)"
+          fi
+
+      - name: Ensure PR label exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          COUNT=$(gh label list --json name --jq '[.[] | select(.name=="subtree-sync")] | length')
+          if [[ "$COUNT" == "0" ]]; then
+            gh label create "subtree-sync" --color "0366d6" --description "Subtree sync PR"
+            echo "Created label 'subtree-sync'"
+          else
+            echo "Label 'subtree-sync' already exists"
+          fi
+
+      - name: Create or update PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          BASE="${{ steps.branch.outputs.target_branch }}"
+          HEAD="${{ steps.branch.outputs.sync_branch }}"
+
+          # Check if PR already exists
+          COUNT=$(gh pr list --base "$BASE" --head "$HEAD" --json number --jq 'length')
+          if [[ "$COUNT" == "0" ]]; then
+            gh pr create \
+              --base "$BASE" \
+              --head "$HEAD" \
+              --title "Sync subtree changes from ${{ steps.branch.outputs.split_branch }} to $BASE" \
+              --body "This PR was auto-prepared by CI. It merges subtree split branch \`${{ steps.branch.outputs.split_branch }}\` into \`$BASE\` using --allow-unrelated-histories.\n\nPlease review and merge." \
+              --label "subtree-sync"
+            echo "✓ PR created"
+          else
+            echo "PR already exists and will be updated automatically by the new push."
+          fi
