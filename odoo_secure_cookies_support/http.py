@@ -3,7 +3,7 @@ from odoo.http import FutureResponse, Response, request
 from odoo.tools import str2bool
 import functools
 
-DEFAULT_SAMESITE = 'Strict'
+DEFAULT_SAMESITE = 'Lax'
 
 
 def _get_secure_cookies_param(default=False):
