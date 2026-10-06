@@ -7,7 +7,13 @@ DEFAULT_SAMESITE = 'Lax'
 
 
 def _get_secure_cookies_param(default=False):
-    return default or str2bool(request.env['ir.config_parameter'].sudo().get_param('secure_cookies', False))
+    if default or not request:
+        return default
+    if request.env is None:
+        # No database is bound yet (/web/session/authenticate, the database manager,
+        # a server without db_filter), so there is no parameter to read.
+        return request.httprequest.scheme == 'https'
+    return str2bool(request.env['ir.config_parameter'].sudo().get_param('secure_cookies', False))
 
 
 def _set_cookie_wrapper(original_func, response_class):
