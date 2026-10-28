@@ -4,7 +4,9 @@ Addons in this repository are licensed **individually**. Each declares its own `
 `__manifest__.py`, and that declaration governs. This file is the map.
 
 <!-- ADDON_LICENSE_TABLE_START -->
-<!-- Add a row per addon: name, declared licence, and where its text lives. -->
+| Addon | Licence | Terms |
+|---|---|---|
+| `odoo_secure_cookies_support` | LGPL-3 | [`odoo_secure_cookies_support/LICENSE.md`](odoo_secure_cookies_support/LICENSE.md) |
 <!-- ADDON_LICENSE_TABLE_END -->
 
 Recommended licence for new first-party addons here: **`LGPL-3`**, from this repository's
@@ -39,12 +41,10 @@ check only ever looks inside addons.
 
 ## Copyright
 
-Copyright © <YEAR> **Digital Delivery Center Spolka z ograniczona odpowiedzialnoscia**, ul. Kawalerzystow 17/12, 53-004 Wroclaw, Poland, KRS 0000964819, NIP 8992922295 ("DDC").
+Copyright © 2025 **Digital Delivery Center Spolka z ograniczona odpowiedzialnoscia**, ul. Kawalerzystow 17/12, 53-004 Wroclaw, Poland, KRS 0000964819, NIP 8992922295 ("DDC").
 
 DDC trades as **OpsWay**. That is a trading name and not a legal
 person: it cannot hold copyright, grant a licence, or be a party to an agreement. Name the entity.
-
-Replace `<YEAR>` above with the year of first publication.
 
 
 ## LGPL-3
