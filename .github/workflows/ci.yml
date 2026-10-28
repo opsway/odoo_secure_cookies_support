@@ -1,0 +1,167 @@
+name: Static CI
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, reopened, synchronize]
+  # The licence scan is the only job these three reach. An unpinned Python
+  # dependency can change licence without anyone opening a pull request, so the
+  # gate has to run on a clock as well as on review.
+  #
+  # One branch, not every branch this repository maintains: a push runs the
+  # workflow file from the branch pushed, so this copy can only ever answer for
+  # its own and naming the others describes runs it will never see.
+  push:
+    branches: ["18.0"]
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  changed-files:
+    name: Detect relevant changes
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      files: ${{ steps.changed.outputs.all_changed_files }}
+      count: ${{ steps.changed.outputs.all_changed_files_count }}
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        with:
+          fetch-depth: 0
+      - id: changed
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          files_ignore: |
+            docs/**
+            **/*.md
+            .claude/**
+
+  static:
+    name: Static addon checks
+    needs: changed-files
+    if: needs.changed-files.outputs.count != '0'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
+      - name: Install pre-commit
+        run: python -m pip install --upgrade pre-commit
+      - name: Run checks on changed files
+        env:
+          CHANGED_FILES: ${{ needs.changed-files.outputs.files }}
+        run: pre-commit run --files $CHANGED_FILES
+
+  licences:
+    name: Dependency licence scan
+    # Deliberately not behind changed-files. A compliance gate a pull request can
+    # skip by touching only ignored paths is not a gate -- and scripts/** is
+    # usually on that ignore list, which would exempt the licence map itself.
+    runs-on: ubuntu-latest
+    # Odoo core's manifests come from the image; reading a manifest needs no
+    # database, so this job carries no Postgres service and is cheap enough to
+    # run unconditionally.
+    container:
+      image: odoo:18.0
+      options: --user root
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        with:
+          path: pack
+      - name: Install packaging, so requirements are read as Odoo reads them
+        # packaging is optional for Odoo and this image ships without it, so
+        # unaided the gate falls back to Odoo's own bare-name rule and refuses any
+        # specifier, extra or marker. That is correct behaviour -- it is what an
+        # install would do here -- but it is the narrower of the two states, and
+        # the release record below should come from the fuller one. Ahead of the
+        # tests because they cover both states and one of them needs a real parser
+        # to exercise at all.
+        run: pip3 install --break-system-packages --ignore-installed packaging
+      - name: Test the gate before trusting what it reports
+        # Unconditional, for the same reason the scan below is: a gate whose own
+        # tests a pull request can skip is not a gate. Stdlib unittest over
+        # synthetic addon trees -- no network and no addons path, so it runs ahead
+        # of every other step and fails in under a second.
+        run: python3 -m unittest discover -s pack/tests
+      # If this repository pins OCA or other external addon sources, check them
+      # out here and add them to ADDONS_PATH below, so their real manifests are
+      # read instead of KNOWN_LICENSES being taken on trust. Example:
+      #
+      #   - name: Check out OCA/server-auth at the pinned commit
+      #     uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+      #     with:
+      #       repository: OCA/server-auth
+      #       ref: ${{ env.SERVER_AUTH_SHA }}
+      #       path: server-auth
+      - name: Resolve the addons path once
+        run: |
+          echo "ADDONS_PATH=$GITHUB_WORKSPACE/pack,/usr/lib/python3/dist-packages/odoo/addons" >> "$GITHUB_ENV"
+      - name: Install a pip that reports licence metadata
+        # The image ships 24.0, which is new enough for --dry-run --report but
+        # drops the PEP 639 License-Expression field: 25.0 is the first that
+        # relays it, and without it every wheel declaring its licence that way --
+        # idna and urllib3 among them -- reads as declaring none.
+        # --ignore-installed because the distribution's pip has no RECORD file, so
+        # pip cannot uninstall it; this puts a current pip in /usr/local ahead of
+        # it instead.
+        run: pip3 install --break-system-packages --ignore-installed --upgrade pip
+      - name: Scan the whole dependency tree
+        # Addon graph from real manifests, walked transitively, plus the Python
+        # wheels resolved from their published metadata without installing them,
+        # from whichever index pip is configured for -- which the record names
+        # rather than assumes. Both modes audit their offline maps, so a stale
+        # entry is reported rather than trusted.
+        #
+        # --commit because the image has no git, and actions/checkout therefore
+        # took the REST-API tarball, leaving no .git to read.
+        run: |
+          python3 pack/scripts/check_licenses.py \
+            --addons-path="$ADDONS_PATH" \
+            --resolve-python \
+            --commit "$GITHUB_SHA" \
+            --inventory licence-inventory.json
+      - name: Keep the inventory
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: licence-inventory
+          path: licence-inventory.json
+          if-no-files-found: warn
+
+  docs-only:
+    name: Documentation/agent-only change
+    needs: changed-files
+    if: needs.changed-files.outputs.count == '0'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "No addon/tooling files changed; code checks skipped."
+
+  gate:
+    name: CI gate
+    if: always() && github.event_name == 'pull_request'
+    needs: [changed-files, static, docs-only, licences]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require relevant checks to succeed
+        env:
+          DETECT: ${{ needs.changed-files.result }}
+          STATIC: ${{ needs.static.result }}
+          DOCS: ${{ needs.docs-only.result }}
+          LICENCES: ${{ needs.licences.result }}
+        run: |
+          test "$DETECT" = success
+          # Never conditional, so anything but success is a failure.
+          test "$LICENCES" = success
+          if [ "$STATIC" = failure ] || [ "$STATIC" = cancelled ]; then exit 1; fi
+          if [ "$DOCS" = failure ] || [ "$DOCS" = cancelled ]; then exit 1; fi
+          if [ "$STATIC" = skipped ] && [ "$DOCS" = skipped ]; then
+            echo "Neither code nor docs path executed" >&2
+            exit 1
+          fi

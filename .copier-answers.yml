@@ -1,0 +1,18 @@
+# Changes here will be overwritten by Copier; do not edit manually.
+_commit: aae2a20
+_src_path: git@github.com:opsway/odoo-addons-boilerplate.git
+addon_designation: free
+free_licence: LGPL-3
+licensor_brand: OpsWay
+licensor_details: ul. Kawalerzystow 17/12, 53-004 Wroclaw, Poland, KRS 0000964819,
+    NIP 8992922295
+licensor_name: Digital Delivery Center Spolka z ograniczona odpowiedzialnoscia
+licensor_short: DDC
+odoo_version: '18.0'
+odoo_versions:
+- '18.0'
+- '17.0'
+- '19.0'
+repo_description: Secure and SameSite flags on the cookies Odoo sets
+repo_name: odoo_secure_cookies_support
+tech_lead: '@opsway/tech-leads'
