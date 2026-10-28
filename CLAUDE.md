@@ -75,9 +75,6 @@ Everything keys off the `ir.config_parameter` `secure_cookies` (seeded `0`, `nou
 - **`models/ir_http.py`** exposes the flag to the browser in `session_info` and `get_frontend_session_info`.
 - **`static/src/js/core/browser/cookie.js`**, in both `web.assets_backend` and `web.assets_frontend`, patches the
   `document.cookie` setter and `fetch` to append `Secure; SameSite=Strict` — Strict, unlike the server's Lax.
-- **`views/webclient_templates.xml`** sets the `tz` cookie itself, because Odoo's own `tz` script runs before the
-  asset bundle can patch `document.cookie`. It extends `web.layout`, inserting its script right after
-  `web.layout.odooscript`. `web.frontend_layout` is a primary view that inserts Odoo's `tz` script at that same
-  spot only after every `web.layout` extension, priority included, has applied, so on frontend pages Odoo's script
-  runs first and the module's then finds `tz` already set. Check the order with
-  `env.ref('web.frontend_layout')._get_combined_arch()` in `odoo shell`.
+- **`views/webclient_templates.xml`** replaces the inline `tz` cookie script of `web.frontend_layout`, which runs
+  before the asset bundle can patch `document.cookie`. Odoo 19 gives that script nothing to anchor on, so the xpath
+  matches it by content (`tz=`); if upstream rewrites it without that, the xpath fails at install or upgrade.
