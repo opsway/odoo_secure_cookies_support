@@ -19,7 +19,7 @@ class TestCookieType(TransactionCase):
 
     def test_an_optional_cookie_waits_for_consent(self):
         # As a website with a cookie bar answers a visitor who has not accepted optional cookies.
-        def is_allowed(cls, cookie_type):
+        def is_allowed(_cls, cookie_type):
             return cookie_type == 'required'
 
         with patch.object(type(self.env['ir.http']), '_is_allowed_cookie', classmethod(is_allowed)):
