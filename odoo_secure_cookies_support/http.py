@@ -1,7 +1,9 @@
+import functools
+
 import werkzeug
+
 from odoo.http import FutureResponse, Response, request
 from odoo.tools import str2bool
-import functools
 
 DEFAULT_SAMESITE = 'Lax'
 
@@ -18,6 +20,7 @@ def _get_secure_cookies_param(default=False):
 
 def _set_cookie_wrapper(original_func, response_class):
     @functools.wraps(response_class.set_cookie)
+    # pylint: disable-next=too-many-arguments
     def wrapper(self, key, value='', max_age=None, expires=-1, path='/', domain=None,
                 secure=False, httponly=False, samesite=None, cookie_type='required'):
         secure = _get_secure_cookies_param(secure)

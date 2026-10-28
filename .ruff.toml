@@ -4,3 +4,25 @@ target-version = "py310"
 [lint]
 select = ["E", "F", "W", "I", "UP"]
 ignore = ["E501"]
+
+# Odoo import conventions, so `I` does not fight the framework's layout:
+#  * addons re-export their submodules from __init__.py (`from . import models`) — that is the
+#    module's public surface, not dead code, and the per-line order is deliberate (load order);
+#  * `odoo` and `odoo.addons` are their own import sections, kept apart from third-party.
+[lint.per-file-ignores]
+"__init__.py" = ["F401", "I001"]
+
+[lint.isort]
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "odoo",
+    "odoo-addons",
+    "first-party",
+    "local-folder",
+]
+
+[lint.isort.sections]
+odoo = ["odoo"]
+odoo-addons = ["odoo.addons"]
