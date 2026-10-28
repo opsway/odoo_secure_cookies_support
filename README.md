@@ -8,7 +8,7 @@ Supported Odoo version: `17.0`. Other branches of this repository maintain `18.0
 
 <!-- ADDON_LIST_START -->
 
-_No addons discovered._
+- **[Secure Cookies Support](odoo_secure_cookies_support/)** (`17.0.1.0.0`) — Secure Cookies Support
 
 <!-- ADDON_LIST_END -->
 

@@ -11,4 +11,6 @@ valid-odoo-versions=17.0
 max-line-length=120
 
 [MESSAGES CONTROL]
-disable=missing-docstring,invalid-name,too-few-public-methods
+# import-error: Odoo is not installed in the lint environment, so every `from odoo import ...` is
+# unresolvable.
+disable=missing-docstring,invalid-name,too-few-public-methods,import-error
