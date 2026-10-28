@@ -1,0 +1,14 @@
+[MASTER]
+load-plugins=pylint_odoo
+# Pinned to this branch's version so a manifest carrying another major's prefix
+# is caught. Note the pinned pylint-odoo (v8.0.19) knows Odoo versions up to
+# 16.0 only and silently suppresses every one of its own messages when this
+# names a version above that, so nothing here currently fires; see
+# docs/odoo-version-recipes.md in the template repository.
+valid-odoo-versions=18.0
+
+[FORMAT]
+max-line-length=120
+
+[MESSAGES CONTROL]
+disable=missing-docstring,invalid-name,too-few-public-methods
