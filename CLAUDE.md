@@ -70,5 +70,5 @@ Everything keys off the `ir.config_parameter` `secure_cookies` (seeded `0`, `nou
 - **`static/src/js/core/browser/cookie.js`**, in both `web.assets_backend` and `web.assets_frontend`, patches the
   `document.cookie` setter and `fetch` to append `Secure; SameSite=Strict` — Strict, unlike the server's Lax.
 - **`views/webclient_templates.xml`** replaces the inline `tz` cookie script of `web.frontend_layout`, which runs
-  before the asset bundle can patch `document.cookie`. Its xpath matches the script's `t-nocache` text, so it
-  stops applying if upstream rewords that text.
+  before the asset bundle can patch `document.cookie`. Its xpath matches the script's `t-nocache` text; if upstream
+  rewords that text, the xpath fails at install or upgrade.
