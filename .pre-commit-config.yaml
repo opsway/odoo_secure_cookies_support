@@ -1,0 +1,63 @@
+exclude: |
+  (?x)(
+    ^\.copier-answers\.yml$|
+    /static/(src/)?lib/|
+    /tests/([^/]+/)?cassettes/
+  )
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-ast
+      - id: check-merge-conflict
+      - id: check-xml
+      - id: check-yaml
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.0
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+  - repo: https://github.com/OCA/pylint-odoo
+    rev: v8.0.19
+    hooks:
+      - id: pylint_odoo
+        args: ["--rcfile=.pylintrc"]
+        # Repository tooling is not addon code: scripts/ and the root tests/
+        # that cover it are linted by ruff, not by the Odoo linter. An addon's own
+        # tests (<addon>/tests/) do not start with 'tests/' and stay in.
+        files: ^(?!scripts/|tests/|docs/|\.claude/|\.github/)[^/]+/.*\.py$
+  - repo: local
+    hooks:
+      - id: addon-manifests
+        name: Validate addon manifests
+        entry: python3 scripts/check_manifests.py
+        language: system
+        pass_filenames: false
+      # These two carry their own interpreter so that packaging is present: with
+      # it the gate reads external_dependencies['python'] the way Odoo does when
+      # Odoo has it -- specifiers, extras and markers -- and without it the gate
+      # falls back to Odoo's own bare-name rule and refuses the rest. Neither
+      # state is broken, but the fuller one should not depend on what the machine
+      # happened to have, and packaging is in neither pre-commit's dependency
+      # closure nor a bare 3.12 interpreter.
+      - id: addon-licenses
+        name: Check addon licences against their dependencies
+        entry: python3 scripts/check_licenses.py
+        language: python
+        additional_dependencies: ["packaging"]
+        pass_filenames: false
+      - id: licence-gate-tests
+        name: Test the licence gate itself
+        entry: python3 -m unittest discover -s tests
+        language: python
+        additional_dependencies: ["packaging"]
+        pass_filenames: false
+      - id: addon-catalog
+        name: Keep README addon catalog current
+        entry: python3 scripts/update_readme.py --check
+        language: system
+        pass_filenames: false
