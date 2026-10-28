@@ -22,9 +22,11 @@ def _set_cookie_wrapper(original_func, response_class):
                 secure=False, httponly=False, samesite=None, cookie_type='required'):
         secure = _get_secure_cookies_param(secure)
         samesite = samesite or DEFAULT_SAMESITE
+        # cookie_type is what lets Odoo hold an optional cookie (the odoo_utm_* ones, ...) back until the
+        # visitor consents: without it every cookie counts as required.
         return original_func(self, key, value=value, max_age=max_age, expires=expires,
                              path=path, domain=domain, secure=secure, httponly=httponly,
-                             samesite=samesite)
+                             samesite=samesite, cookie_type=cookie_type)
     return wrapper
 
 
