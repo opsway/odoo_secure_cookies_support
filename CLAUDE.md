@@ -60,8 +60,8 @@ docker stop sc-test-db && docker network rm sc-test
 The image's entrypoint overrides `--db_host`/`--db_user`/`--db_password` from `HOST`/`USER`/`PASSWORD`, so pass
 those as environment variables. Against a source checkout, the `odoo` arguments are the same for `odoo-bin`.
 
-The addon has no tests on this branch yet, so the run only proves it installs. One test, once there is one:
-`--test-tags /odoo_secure_cookies_support:<Class>.<method>`.
+One test: `--test-tags /odoo_secure_cookies_support:TestCookieType.test_an_optional_cookie_waits_for_consent`.
+The tests are `post_install`.
 
 ## Architecture
 
